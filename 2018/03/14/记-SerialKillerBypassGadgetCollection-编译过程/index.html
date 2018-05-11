@@ -83,18 +83,18 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="记 SerialKillerBypassGadgetCollection 编译过程">
 <meta property="og:url" content="https://badgsd.github.io/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/index.html">
-<meta property="og:site_name" content="BadGSD">
+<meta property="og:site_name" content="Badcode">
 <meta property="og:description" content="背景  想要生成 Weblogic Deserialization RCE(CVE-2016-3510) 的payload，利用weblogic.corba.utils.MarshallObject的反序列化来绕过 Weblogic 的黑名单，从而执行恶意代码。 简介  SerialKiller 是一个用来绕过可预见的ObjectInputStreams防御反序列化措施，生成用于Java反序列化的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://badgsd.github.io/images/5.png">
-<meta property="og:image" content="https://badgsd.github.io/images/1.png">
-<meta property="og:image" content="https://badgsd.github.io/images/2.png">
-<meta property="og:image" content="https://badgsd.github.io/images/3.png">
-<meta property="og:updated_time" content="2018-03-14T09:48:21.075Z">
+<meta property="og:image" content="https://badgsd.github.io/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/5.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/1.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/2.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/3.png">
+<meta property="og:updated_time" content="2018-05-11T09:26:30.551Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记 SerialKillerBypassGadgetCollection 编译过程">
 <meta name="twitter:description" content="背景  想要生成 Weblogic Deserialization RCE(CVE-2016-3510) 的payload，利用weblogic.corba.utils.MarshallObject的反序列化来绕过 Weblogic 的黑名单，从而执行恶意代码。 简介  SerialKiller 是一个用来绕过可预见的ObjectInputStreams防御反序列化措施，生成用于Java反序列化的">
-<meta name="twitter:image" content="https://badgsd.github.io/images/5.png">
+<meta name="twitter:image" content="https://badgsd.github.io/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/5.png">
 
 
 
@@ -130,7 +130,7 @@
 
 
 
-  <title>记 SerialKillerBypassGadgetCollection 编译过程 | BadGSD</title>
+  <title>记 SerialKillerBypassGadgetCollection 编译过程 | Badcode</title>
   
 
 
@@ -160,7 +160,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">BadGSD</span>
+        <span class="site-title">Badcode</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -240,13 +240,13 @@
     <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="BadGSD">
+      <meta itemprop="name" content="Badcode">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="BadGSD">
+      <meta itemprop="name" content="Badcode">
     </span>
 
     
@@ -343,11 +343,11 @@
 <p>到此，所以的依赖都已经准备好了，在项目根目录中，新建<code>external</code>文件夹，将上面的10个包放进文件夹中。</p>
 <h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>先解决<code>jai_core</code>依赖问题，修改<code>pom.xml</code>，在<code>maven-install-plugin</code>加一个<code>execution</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;execution&gt;</span><br><span class="line">    &lt;id&gt;install-jai&lt;/id&gt;</span><br><span class="line">    &lt;phase&gt;clean&lt;/phase&gt;</span><br><span class="line">    &lt;configuration&gt;</span><br><span class="line">        &lt;file&gt;$&#123;basedir&#125;/external/jai_core-1.1.3.jar&lt;/file&gt;</span><br><span class="line">        &lt;repositoryLayout&gt;default&lt;/repositoryLayout&gt;</span><br><span class="line">        &lt;groupId&gt;javax.media&lt;/groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;jai_core&lt;/artifactId&gt;</span><br><span class="line">        &lt;version&gt;1.1.3&lt;/version&gt;</span><br><span class="line">        &lt;packaging&gt;jar&lt;/packaging&gt;</span><br><span class="line">        &lt;generatePom&gt;true&lt;/generatePom&gt;</span><br><span class="line">    &lt;/configuration&gt;</span><br><span class="line">    &lt;goals&gt;</span><br><span class="line">        &lt;goal&gt;install-file&lt;/goal&gt;</span><br><span class="line">    &lt;/goals&gt;</span><br><span class="line">&lt;/execution&gt;</span><br></pre></td></tr></table></figure></p>
 <p>然后将本地的 jar 包添加到本地的仓库里<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean</span><br></pre></td></tr></table></figure></p>
-<p>执行完之后，可以看到本地的 jar 包已经添加到本地仓库里面了，可以调用了。<br><img src="/images/5.png" alt=""></p>
+<p>执行完之后，可以看到本地的 jar 包已经添加到本地仓库里面了，可以调用了。<br><img src="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/5.png"></p>
 <p>最后执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean compile assembly:single</span><br></pre></td></tr></table></figure></p>
-<p>重新编译，发现依赖问题解决了，可以引用了，但是代码又出错了。提示<code>ysoserial.GeneratePayload</code>不存在<code>ToStringComparator</code>方法。<br><img src="/images/1.png" alt=""></p>
-<p>对 Java 不熟啊，没法改，还好这是个输出用法函数，索性直接注释了。。<br><img src="/images/2.png" alt=""></p>
-<p>再次编译<br><img src="/images/3.png" alt=""></p>
+<p>重新编译，发现依赖问题解决了，可以引用了，但是代码又出错了。提示<code>ysoserial.GeneratePayload</code>不存在<code>ToStringComparator</code>方法。<br><img src="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/1.png"></p>
+<p>对 Java 不熟啊，没法改，还好这是个输出用法函数，索性直接注释了。。<br><img src="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/2.png"></p>
+<p>再次编译<br><img src="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/3.png"></p>
 <p>终于成功了….撒花</p>
 <h3 id="payload-测试"><a href="#payload-测试" class="headerlink" title="payload 测试"></a>payload 测试</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar target/serialkiller-bypass-gadgets-0.0.1-SNAPSHOT-all.jar CommonsCollections1  Weblogic1 &quot;calc&quot; &gt; calc</span><br></pre></td></tr></table></figure>
 <p>用脚本将生成的 payload 发送过去，成功在打了CVE-2015-4852补丁的 Weblogic 上弹出计算器。</p>
@@ -381,8 +381,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/04/17/Java反序列化纸Commons-Collections/" rel="prev" title="">
-                 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/" rel="prev" title="Weblogic 反序列漏洞 CVE-2018-2628 漫谈">
+                Weblogic 反序列漏洞 CVE-2018-2628 漫谈 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -449,7 +449,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">BadGSD</p>
+              <p class="site-author-name" itemprop="name">Badcode</p>
               <p class="site-description motion-element" itemprop="description">学习经历</p>
           </div>
 
@@ -523,7 +523,7 @@
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">BadGSD</span>
+  <span class="author" itemprop="copyrightHolder">Badcode</span>
 
   
 </div>

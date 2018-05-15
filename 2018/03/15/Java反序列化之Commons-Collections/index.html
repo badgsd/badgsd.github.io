@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Badcode">
 <meta property="og:description" content="Apache Commons-Collections 简介Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的重要组件，Commons Collections被广泛应用于各种Java应用的开发。 一些Java应用程序(Weblogic，Websp">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-05-15T08:49:05.085Z">
+<meta property="og:updated_time" content="2018-05-15T08:52:34.570Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java反序列化之Commons-Collections">
 <meta name="twitter:description" content="Apache Commons-Collections 简介Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的重要组件，Commons Collections被广泛应用于各种Java应用的开发。 一些Java应用程序(Weblogic，Websp">
@@ -299,7 +299,7 @@
       
 
       
-        <h4 id="Apache-Commons-Collections-简介"><a href="#Apache-Commons-Collections-简介" class="headerlink" title="Apache Commons-Collections 简介"></a>Apache Commons-Collections 简介</h4><p>Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的重要组件，Commons Collections被广泛应用于各种Java应用的开发。</p>
+        <h3 id="Apache-Commons-Collections-简介"><a href="#Apache-Commons-Collections-简介" class="headerlink" title="Apache Commons-Collections 简介"></a>Apache Commons-Collections 简介</h3><p>Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的重要组件，Commons Collections被广泛应用于各种Java应用的开发。</p>
 <p>一些Java应用程序(Weblogic，Websphere，Jboss，Jenkins，Coldfusion等)的RCE漏洞都是因为Commons-Collections的反序列化造成的。</p>
 <h3 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h3><p>Apache Commons Collections 中提供 了一个Transformer的类，这个接口的功能就是将一个对象转换为另外一个对象。</p>
 <p>首先关注一下几个重要的类：</p>
@@ -516,7 +516,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Apache-Commons-Collections-简介"><span class="nav-number">1.</span> <span class="nav-text">Apache Commons-Collections 简介</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞原理"><span class="nav-number"></span> <span class="nav-text">漏洞原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TransformedMap"><span class="nav-number">1.</span> <span class="nav-text">TransformedMap</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LazyMap"><span class="nav-number">2.</span> <span class="nav-text">LazyMap</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞利用"><span class="nav-number"></span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考链接"><span class="nav-number"></span> <span class="nav-text">参考链接</span></a></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Apache-Commons-Collections-简介"><span class="nav-number">1.</span> <span class="nav-text">Apache Commons-Collections 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞原理"><span class="nav-number">2.</span> <span class="nav-text">漏洞原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TransformedMap"><span class="nav-number">2.1.</span> <span class="nav-text">TransformedMap</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LazyMap"><span class="nav-number">2.2.</span> <span class="nav-text">LazyMap</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞利用"><span class="nav-number">3.</span> <span class="nav-text">漏洞利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考链接"><span class="nav-number">4.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
             
 
           </div>

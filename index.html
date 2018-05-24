@@ -232,6 +232,160 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2018/05/20/WebLogic-动态调试环境搭建/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Badcode">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Badcode">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/20/WebLogic-动态调试环境搭建/" itemprop="url">WebLogic 动态调试环境搭建</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-20T01:00:02+08:00">
+                2018-05-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="背景简介"><a href="#背景简介" class="headerlink" title="背景简介"></a>背景简介</h3><p>​    WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java Enterprise 标准的安全性引入大型网络应用的开发、集成、部署和管理之中。</p>
+<p>​    近年来，Java 反序列化爆发，WebLogic 作为一个 Java 应用服务器也深受反序列漏洞的影响。就目前在外有详情和漏洞利用程序的 WebLogic 反序列化漏洞就有不少，CVE-2015-4852，CVE-2016-0638，CVE-2016-3510，CVE-2017-3248，CVE-2018-2628等。本文记录的就是一个搭建 WebLogic 动态调试环境的过程，方便调试 WebLogic 相关漏洞。</p>
+<h3 id="工具准备"><a href="#工具准备" class="headerlink" title="工具准备"></a>工具准备</h3><ul>
+<li>IntelliJ IDEA</li>
+<li>WebLogic 10.3.6.0</li>
+<li>一个可以部署在 WebLogic 上的 web 应用，我用的是jolokia-1.0.0。</li>
+</ul>
+<h3 id="下载安装"><a href="#下载安装" class="headerlink" title="下载安装"></a>下载安装</h3><ol>
+<li><p>WebLogic 去 Oracle 官网下载，我下载的是WebLogic 10.3.6.0，点击安装即可。</p>
+</li>
+<li><p>Web 应用使用的是jolokia-1.0.0，选个能在 WebLogic 上部署的 web 应用就行，要注意的是 jdk 版本问题，我下载的 WebLogic 10.3.6.0 ，它自带的 jdk 版本很低，是1.6.029，可以说非常古老了。所以选择的 web 应用要保证在 jdk 1.6.029 上运行。</p>
+</li>
+<li>将 web 项目导入到 IntelliJ IDEA 里面。</li>
+</ol>
+<img src="/2018/05/20/WebLogic-动态调试环境搭建/import_project.png">
+<h3 id="配置-WebLogic"><a href="#配置-WebLogic" class="headerlink" title="配置 WebLogic"></a>配置 WebLogic</h3><h4 id="设置-web-项目-JDK"><a href="#设置-web-项目-JDK" class="headerlink" title="设置 web 项目 JDK"></a>设置 web 项目 JDK</h4><p>​    点击 idea 的 <code>Project Structure</code>，新建一个 jdk，web 项目要使用 WebLogic 自带的jdk，因为调试反序列化漏洞的时候会跟到 jdk 里面的相关函数，所以这里一定要使用 WebLogic 的jdk，这个非常非常重要。</p>
+<img src="/2018/05/20/WebLogic-动态调试环境搭建/set_jdk.png">
+<h4 id="新建-Weblgoic"><a href="#新建-Weblgoic" class="headerlink" title="新建 Weblgoic"></a>新建 Weblgoic</h4><p>​    点击 idea 的<code>Edit Configurations</code>，添加一个本地的 WebLogic。</p>
+<img src="/2018/05/20/WebLogic-动态调试环境搭建/add_weblogic.png">
+<h4 id="配置-WebLogic-服务器"><a href="#配置-WebLogic-服务器" class="headerlink" title="配置 WebLogic 服务器"></a>配置 WebLogic 服务器</h4><p>​    新建一个本地 WebLogic 之后，WebLogic server的名字可以自己随意填，要在<code>Application server</code>中配置一个 WebLogic 服务器，也就是将本地安装的 WebLogic 和idea 连通起来。<code>WebLogic Home</code>添加的是 WebLogic 的安装目录。</p>
+<img src="/2018/05/20/WebLogic-动态调试环境搭建/configure_weblogic.png">
+<p>​    配置好之后，下面的<code>Domain Path</code>就会自动识别了，这里要填的就是 WebLogic 的管理员的账号密码了，因为要部署 web 应用。</p>
+<img src="/2018/05/20/WebLogic-动态调试环境搭建/auth.png">
+<p>​    最后在设置一下下<code>Deployment</code>，添加一个<code>Artifacts</code></p>
+<img src="/2018/05/20/WebLogic-动态调试环境搭建/add_artifacts.png">
+<p>​    添加完之后就ok了，可以跑起来了。</p>
+<img src="/2018/05/20/WebLogic-动态调试环境搭建/run.png">
+<h3 id="调试-WebLogic"><a href="#调试-WebLogic" class="headerlink" title="调试 WebLogic"></a>调试 WebLogic</h3><p>​    经过上面的步骤，已经可以成功的在 idea 上运行 WebLogic了，接下来的调试也很简单，想调试哪个包，在web 项目的 <code>Libraries</code> 上添加进去，然后下断点就行了。</p>
+<p>​    WebLogic 大多数包都是在<code>Middleware\modules</code>，所以我把整个文件夹添加到 web 项目的<code>Libraries</code>。</p>
+<img src="/2018/05/20/WebLogic-动态调试环境搭建/add_modules.png">
+<p>​    添加完成后，此时就可以在 idea 的 <code>External Libtaries</code> 中看到我们添加的包。</p>
+<img src="/2018/05/20/WebLogic-动态调试环境搭建/modules.png">
+<p>​    例如，WebLogic 的反序列漏洞大多是通过t3协议来发送 payload，数据流会经过<code>InboundMsgAbbrev</code>这个类，我们就可以在<code>D:\Oracle\Middleware\modules\com.bea.core.WebLogic.rmi.client_1.11.0.0.jar!\WebLogic\rjvm\InboundMsgAbbrev.class</code>上下断点，然后debug启动，用脚本发送payload，可以看到，成功的debug到了。</p>
+<img src="/2018/05/20/WebLogic-动态调试环境搭建/debug.png">
+<p>​    有一些漏洞触发点在其他的包里面，可以找到位置添加到<code>Libraries</code>里，在里面下断点就可以 debug 了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2018/05/19/Red-Hat-DHCP客户端命令执行漏洞-CVE-2018-1111-复现与简析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -949,7 +1103,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

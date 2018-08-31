@@ -1372,7 +1372,7 @@ MetInfo 6.0.0
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2017/08/14/CmsEasy-前台SQL注入漏洞/">
+    <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2017/09/04/OurPHP-注册页面SQL注入漏洞/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Badcode">
@@ -1391,7 +1391,7 @@ MetInfo 6.0.0
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/08/14/CmsEasy-前台SQL注入漏洞/" itemprop="url">CmsEasy 前台SQL注入漏洞</a></h1>
+                <a class="post-title-link" href="/2017/09/04/OurPHP-注册页面SQL注入漏洞/" itemprop="url">OurPHP 注册页面SQL注入漏洞</a></h1>
         
 
         <div class="post-meta">
@@ -1403,8 +1403,8 @@ MetInfo 6.0.0
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-14T00:55:31+08:00">
-                2017-08-14
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-04T01:04:07+08:00">
+                2017-09-04
               </time>
             
 
@@ -1443,12 +1443,14 @@ MetInfo 6.0.0
       
         
           
-          漏洞分析首先看到/lib/default/area_act.php
-12345678910111213141516171819202122232425262728293031323334353637383940414243function list_action() &#123;    $this-
+          漏洞描述OURPHP（傲派建站系统）是一款使用PHP语言开发的网站内容管理系统，开发商为哈尔滨伟成科技有限公司。其注册页面处存在一个SQL漏洞。
+漏洞原因对参数进行过滤的过滤函数容易绕过。
+漏洞分析首先看到/client/user/ourphp_play.class.php
+123456789101
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/08/14/CmsEasy-前台SQL注入漏洞/#more" rel="contents">
+            <a class="btn" href="/2017/09/04/OurPHP-注册页面SQL注入漏洞/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1536,7 +1538,7 @@ MetInfo 6.0.0
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

